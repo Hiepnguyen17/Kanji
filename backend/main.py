@@ -56,11 +56,30 @@ def vocabulary(level: str | None = None, lesson_id: int | None = None):
 def search_vocabulary(q: str):
     with connect() as db: return [row(x) for x in db.execute("SELECT * FROM vocabulary WHERE word LIKE ? OR reading LIKE ? OR meaning LIKE ?", (f"%{q}%",) * 3).fetchall()]
 
+@app.get("/admin/vocabulary-staging")
+def vocabulary_staging(level: str = "N5", status_filter: str = "review"):
+    with connect() as db:
+        return [row(x) for x in db.execute("SELECT * FROM vocabulary_staging WHERE level=? AND status=? ORDER BY suggested_topic, id", (level.upper(), status_filter)).fetchall()]
+
 @app.get("/lessons")
 def list_lessons(level: str | None = None):
-    query, values = "SELECT * FROM lessons", []
-    if level: query += " WHERE level = ?"; values.append(level.upper())
-    with connect() as db: return [row(x) for x in db.execute(query + " ORDER BY level, order_index, id", values).fetchall()]
+    query, values = "SELECT l.*, COUNT(v.id) AS word_count FROM lessons l LEFT JOIN vocabulary v ON v.lesson_id = l.id", []
+    if level: query += " WHERE l.level = ?"; values.append(level.upper())
+    query += " GROUP BY l.id ORDER BY l.level, l.order_index, l.id"
+    with connect() as db: return [row(x) for x in db.execute(query, values).fetchall()]
+
+@app.get("/lesson-groups")
+def list_lesson_groups(level: str = "N5"):
+    with connect() as db:
+        groups = db.execute("SELECT * FROM lesson_groups WHERE level=? ORDER BY order_index, id", (level.upper(),)).fetchall()
+        result = []
+        for group in groups:
+            lessons = db.execute("""SELECT l.*, COUNT(v.id) AS word_count
+                FROM lessons l LEFT JOIN vocabulary v ON v.lesson_id=l.id
+                WHERE l.group_id=? GROUP BY l.id HAVING COUNT(v.id) > 0
+                ORDER BY l.order_index, l.id""", (group["id"],)).fetchall()
+            result.append({**row(group), "lessons": [row(lesson) for lesson in lessons]})
+    return result
 
 @app.get("/lessons/{lesson_id}")
 def lesson_detail(lesson_id: int):
@@ -69,6 +88,23 @@ def lesson_detail(lesson_id: int):
         words = db.execute("SELECT * FROM vocabulary WHERE lesson_id = ? ORDER BY id", (lesson_id,)).fetchall()
     if not lesson: raise HTTPException(404, "Không tìm thấy bài học")
     return {**row(lesson), "vocabulary":[row(x) for x in words]}
+
+@app.get("/grammar/lessons")
+def grammar_lessons(level: str = "N5"):
+    with connect() as db:
+        return [row(x) for x in db.execute("SELECT * FROM grammar_lessons WHERE level = ? ORDER BY order_index", (level.upper(),)).fetchall()]
+
+@app.get("/grammar/lessons/{lesson_id}")
+def grammar_lesson_detail(lesson_id: int):
+    with connect() as db:
+        lesson = db.execute("SELECT * FROM grammar_lessons WHERE id = ?", (lesson_id,)).fetchone()
+        patterns = db.execute("SELECT * FROM grammar_patterns WHERE lesson_id = ? ORDER BY id", (lesson_id,)).fetchall()
+        detail = []
+        for pattern in patterns:
+            examples = db.execute("SELECT * FROM grammar_examples WHERE pattern_id = ? ORDER BY id", (pattern["id"],)).fetchall()
+            detail.append({**row(pattern), "examples":[row(x) for x in examples]})
+    if not lesson: raise HTTPException(404, "Không tìm thấy bài ngữ pháp")
+    return {**row(lesson), "patterns": detail}
 
 # Local MVP only: protect /admin routes with JWT before a public deployment.
 @app.post("/admin/kanji", status_code=status.HTTP_201_CREATED)
