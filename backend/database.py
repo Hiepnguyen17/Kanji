@@ -22,6 +22,14 @@ def initialize_database():
         CREATE TABLE IF NOT EXISTS grammar_lessons (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL, order_index INTEGER NOT NULL, UNIQUE(level, title));
         CREATE TABLE IF NOT EXISTS grammar_patterns (id INTEGER PRIMARY KEY AUTOINCREMENT, lesson_id INTEGER NOT NULL REFERENCES grammar_lessons(id) ON DELETE CASCADE, formula TEXT NOT NULL, explanation_vi TEXT NOT NULL, note TEXT NOT NULL, UNIQUE(lesson_id, formula));
         CREATE TABLE IF NOT EXISTS grammar_examples (id INTEGER PRIMARY KEY AUTOINCREMENT, pattern_id INTEGER NOT NULL REFERENCES grammar_patterns(id) ON DELETE CASCADE, japanese TEXT NOT NULL, reading TEXT NOT NULL, meaning_vi TEXT NOT NULL, UNIQUE(pattern_id, japanese));
+        CREATE TABLE IF NOT EXISTS handwriting_samples (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            expected_text TEXT NOT NULL,
+            image_path TEXT NOT NULL UNIQUE,
+            image_sha256 TEXT NOT NULL UNIQUE,
+            source TEXT NOT NULL DEFAULT 'flashcard',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
         """)
         # Migration for databases created before lesson groups were introduced.
         lesson_columns = {column["name"] for column in db.execute("PRAGMA table_info(lessons)")}

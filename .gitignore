@@ -1,0 +1,11 @@
+# Local datasets and trained artefacts. ETL data may not be redistributed.
+backend/data/
+backend/models/*.pt
+backend/models/*.json
+
+# Local build/runtime files
+.venv/
+__pycache__/
+backend/__pycache__/
+node_modules/
+.vite/
