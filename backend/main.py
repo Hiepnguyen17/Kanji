@@ -6,9 +6,11 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+import numpy as np
+from PIL import Image, ImageDraw
 from database import connect, initialize_database
 try:
-    from recognizer import model_status, recognize
+    from recognizer import model_status, recognize, recognize_rasterized_png, recognize_rasterized_strokes
     ML_IMPORT_ERROR = None
 except ModuleNotFoundError as error:
     # Keep the vocabulary API available if an optional ML package is not yet
@@ -21,6 +23,12 @@ except ModuleNotFoundError as error:
     def recognize(_: bytes, __: int):
         return []
 
+    def recognize_rasterized_strokes(_: object, __: int):
+        return []
+
+    def recognize_rasterized_png(_: bytes, __: int):
+        return []
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     initialize_database()
@@ -30,7 +38,10 @@ app = FastAPI(title="KanjiAI API", version="0.3.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 class RecognitionRequest(BaseModel):
-    image: str
+    image: str | None = None
+    strokes: list[list[list[float]]] | None = None
+    canvas_size: int = Field(default=400, ge=64, le=1024)
+    rasterized: bool = False
     top_k: int = Field(default=3, ge=1, le=3)
     stroke_count: int | None = Field(default=None, ge=1, le=40)
     expected_text: str | None = Field(default=None, max_length=20)
@@ -74,6 +85,54 @@ def canvas_png(image: str) -> bytes:
     if not raw or len(raw) > MAX_HANDWRITING_IMAGE_BYTES:
         raise HTTPException(413, "Ảnh nét viết quá lớn")
     return raw
+
+
+def rasterize_strokes(strokes: list[list[list[float]]], size: int) -> np.ndarray:
+    """Independently recreate DaKanji's public vector-to-raster contract.
+
+    The model receives smooth white ink on a black square, cropped around the
+    original vector points and padded proportionally. Keeping a square avoids
+    distorting wide glyphs such as 二 when the model resizes to 64×64.
+    """
+    if not strokes or len(strokes) > 40:
+        raise ValueError("Số nét viết không hợp lệ")
+    image = Image.new("L", (size, size), 0)
+    draw = ImageDraw.Draw(image)
+    points_for_bounds: list[tuple[float, float]] = []
+    stroke_width = 16
+    for stroke in strokes:
+        if not stroke or len(stroke) > 4000:
+            raise ValueError("Dữ liệu một nét viết không hợp lệ")
+        points: list[tuple[float, float]] = []
+        for point in stroke:
+            if len(point) < 2:
+                raise ValueError("Tọa độ nét viết không hợp lệ")
+            x, y = float(point[0]), float(point[1])
+            if not (np.isfinite(x) and np.isfinite(y)):
+                raise ValueError("Tọa độ nét viết không hợp lệ")
+            points.append((x, y))
+            points_for_bounds.append((x, y))
+        if len(points) == 1:
+            x, y = points[0]
+            draw.ellipse((x - stroke_width / 2, y - stroke_width / 2, x + stroke_width / 2, y + stroke_width / 2), fill=255)
+        else:
+            draw.line(points, fill=255, width=stroke_width, joint="curve")
+    if not points_for_bounds:
+        raise ValueError("Chưa có nét viết")
+    xs, ys = zip(*points_for_bounds)
+    left, top = max(0, int(np.floor(min(xs) - stroke_width))), max(0, int(np.floor(min(ys) - stroke_width)))
+    right, bottom = min(size, int(np.ceil(max(xs) + stroke_width))), min(size, int(np.ceil(max(ys) + stroke_width)))
+    glyph_width, glyph_height = max(1, right - left), max(1, bottom - top)
+    padding = int(np.ceil(max(glyph_width, glyph_height) * 0.1))
+    side = max(glyph_width, glyph_height) + padding * 2
+    crop_left, crop_top = int(np.floor(left - (side - glyph_width) / 2)), int(np.floor(top - (side - glyph_height) / 2))
+    crop_left, crop_top = max(0, crop_left), max(0, crop_top)
+    if crop_left + side > size:
+        crop_left = max(0, size - side)
+    if crop_top + side > size:
+        crop_top = max(0, size - side)
+    crop_width, crop_height = min(side, size - crop_left), min(side, size - crop_top)
+    return np.asarray(image.crop((crop_left, crop_top, crop_left + crop_width, crop_top + crop_height)), dtype=np.float32)
 
 def rank_with_stroke_count(predictions: list[dict], stroke_count: int | None) -> list[dict]:
     """Use stroke count as a soft tie-breaker, preserving generic DaKanji."""
@@ -195,7 +254,17 @@ def add_vocabulary(item: VocabularyCreate):
 def recognition(request: RecognitionRequest):
     # Request more candidates so a correct, stroke-compatible character can
     # move into the visible top three without excluding generic DaKanji output.
-    predictions = recognize(canvas_png(request.image), 30)
+    try:
+        if request.image and request.rasterized:
+            predictions = recognize_rasterized_png(canvas_png(request.image), 30)
+        elif request.strokes is not None:
+            predictions = recognize_rasterized_strokes(rasterize_strokes(request.strokes, request.canvas_size), 30)
+        elif request.image:
+            predictions = recognize(canvas_png(request.image), 30)
+        else:
+            raise HTTPException(422, "Hãy gửi ảnh hoặc dữ liệu nét viết")
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
     predictions = rank_with_stroke_count(predictions, request.stroke_count)[:request.top_k]
     status_info = model_status()
     if not predictions:

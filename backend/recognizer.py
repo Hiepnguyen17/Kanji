@@ -82,10 +82,38 @@ def _crop_ink_for_dakanji(ink: np.ndarray) -> np.ndarray:
     return ink[top:bottom, left:right]
 
 
+def _dakanji_predictions(pixels: np.ndarray, top_k: int) -> list[dict]:
+    """Run the official ONNX model on its already-rasterized input."""
+    dakanji = load_dakanji_model()
+    if not dakanji:
+        return []
+    session, labels = dakanji
+    value = np.asarray(pixels, dtype=np.float32)[None, None, :, :]
+    probabilities = session.run(None, {session.get_inputs()[0].name: value})[0][0]
+    indices = np.argsort(probabilities)[-min(top_k, len(labels)):][::-1]
+    return [{"kanji": labels[int(index)], "confidence": round(float(probabilities[index]), 4)} for index in indices]
+
+
+def recognize_rasterized_strokes(pixels: np.ndarray, top_k: int) -> list[dict]:
+    """Recognize white ink on black, square-padded vector stroke rasterization."""
+    predictions = _dakanji_predictions(pixels, top_k)
+    if predictions:
+        return predictions
+    image = Image.fromarray(np.asarray(pixels, dtype=np.uint8), mode="L")
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    return recognize(buffer.getvalue(), top_k)
+
+
+def recognize_rasterized_png(png: bytes, top_k: int) -> list[dict]:
+    """Use a browser-rasterized DaKanji image without thresholding or recropping."""
+    image = Image.open(BytesIO(png)).convert("L")
+    return recognize_rasterized_strokes(np.asarray(image, dtype=np.float32), top_k)
+
+
 def recognize(png: bytes, top_k: int) -> list[dict]:
     dakanji = load_dakanji_model()
     if dakanji:
-        session, labels = dakanji
         image = Image.open(BytesIO(png)).convert("L")
         # DaKanji was trained on ETL-style images: black background and white
         # ink in the 0..255 range. The browser canvas is the inverse and also
@@ -95,10 +123,7 @@ def recognize(png: bytes, top_k: int) -> list[dict]:
         # DaKanji's ONNX graph accepts a raw grayscale image of any size and
         # resizes internally. Keep the cropped glyph raw instead of applying
         # KanjiAI's separate 64x64 normalizer.
-        value = (_crop_ink_for_dakanji(ink) * 255.0)[None, None, :, :]
-        probabilities = session.run(None, {session.get_inputs()[0].name: value})[0][0]
-        indices = np.argsort(probabilities)[-min(top_k, len(labels)):][::-1]
-        return [{"kanji": labels[int(index)], "confidence": round(float(probabilities[index]), 4)} for index in indices]
+        return _dakanji_predictions(_crop_ink_for_dakanji(ink) * 255.0, top_k)
     loaded = load_model()
     if not loaded:
         return []

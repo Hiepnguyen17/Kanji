@@ -20,6 +20,7 @@ VOCABULARY_GROUPS = [
     ("N5", "うごき", "Động từ hành động", "Hành động trong cuộc sống hằng ngày.", 16),
     ("N5", "じょうたい", "Động từ trạng thái & sở thích", "Trạng thái, giao tiếp và hoạt động yêu thích.", 17),
     ("N5", "けいようし", "Tính từ & miêu tả", "Miêu tả người, vật, cảm xúc và đặc điểm.", 18),
+    ("N5", "ふくし", "Trạng từ & mức độ", "Mức độ, tần suất và thời điểm trong câu hằng ngày.", 19),
 ]
 
 LESSON_GROUPS = {
@@ -86,6 +87,22 @@ WORDS = [
     (21,"犬","いぬ","chó"),(21,"猫","ねこ","mèo"),(21,"鳥","とり","chim"),(21,"馬","うま","ngựa"),(21,"牛","うし","bò"),(21,"動物","どうぶつ","động vật"),(21,"ペット","ペット","thú cưng"),(21,"魚","さかな","cá"),(21,"虫","むし","côn trùng"),(21,"うさぎ","うさぎ","thỏ"),
 ]
 
+# Ví dụ được biên soạn cho lộ trình mở đầu. Các bài còn lại tiếp tục dùng cùng
+# cấu trúc dữ liệu này để không phải đổi giao diện hay cơ sở dữ liệu về sau.
+# Không sao chép ví dụ từ nguồn tham khảo bên ngoài.
+VOCABULARY_EXAMPLES = {
+    ("こんにちは", "こんにちは"): ("こんにちは。田中です。", "こんにちは。たなかです。", "Xin chào. Tôi là Tanaka."),
+    ("おはよう", "おはよう"): ("おはよう。今日は元気ですか。", "おはよう。きょうは げんき ですか。", "Chào buổi sáng. Hôm nay bạn khỏe không?"),
+    ("こんばんは", "こんばんは"): ("こんばんは。今日は寒いですね。", "こんばんは。きょうは さむい ですね。", "Chào buổi tối. Hôm nay trời lạnh nhỉ."),
+    ("さようなら", "さようなら"): ("さようなら。また明日。", "さようなら。また あした。", "Tạm biệt. Hẹn gặp lại ngày mai."),
+    ("ありがとう", "ありがとう"): ("ありがとう。とても嬉しいです。", "ありがとう。とても うれしい です。", "Cảm ơn. Tôi rất vui."),
+    ("すみません", "すみません"): ("すみません、駅はどこですか。", "すみません、えき は どこ ですか。", "Xin lỗi, ga ở đâu ạ?"),
+    ("はい", "はい"): ("はい、分かりました。", "はい、わかりました。", "Vâng, tôi hiểu rồi."),
+    ("いいえ", "いいえ"): ("いいえ、これは私の本です。", "いいえ、これは わたし の ほん です。", "Không, đây là sách của tôi."),
+    ("お願いします", "おねがいします"): ("これをお願いします。", "これを おねがいします。", "Làm ơn cho tôi cái này."),
+    ("はじめまして", "はじめまして"): ("はじめまして。山田です。", "はじめまして。やまだ です。", "Rất hân hạnh được gặp. Tôi là Yamada."),
+}
+
 # Kho rà soát: chưa xuất hiện trên giao diện cho đến khi một chủ đề có đủ từ và được duyệt.
 # JLPT không có danh sách từ vựng N5 chính thức; các mục này là ứng viên N5 tham khảo,
 # nghĩa Việt được KanjiAI biên soạn dựa trên JMdict/EDICT.
@@ -146,6 +163,7 @@ STAGING_PROMOTIONS = {
     "Phương hướng & vị trí": ("Phương hướng & vị trí", "Từ chỉ phương hướng và vị trí khi hỏi đường.", 50, "Di chuyển & phương tiện"),
     "Thời tiết thay đổi": ("Thời tiết thay đổi", "Hiện tượng thời tiết và cảnh vật theo mùa.", 51, "Thiên nhiên & thời tiết"),
     "Chăm sóc cá nhân": ("Chăm sóc cá nhân", "Đồ dùng và hoạt động chăm sóc cơ thể.", 52, "Cơ thể & sức khỏe"),
+    "Trạng từ & mức độ": ("Trạng từ & mức độ", "Từ chỉ mức độ, tần suất và thời điểm thường dùng trong câu N5.", 53, "Trạng từ & mức độ"),
 }
 
 N5_STAGING_WORDS += [
@@ -209,4 +227,18 @@ N5_STAGING_WORDS += [
     ("Giá & thanh toán", "品物", "しなもの", "hàng hóa"), ("Giá & thanh toán", "財布", "さいふ", "ví tiền"), ("Giá & thanh toán", "レジ", "レジ", "quầy tính tiền"), ("Giá & thanh toán", "商品", "しょうひん", "sản phẩm; hàng hóa"), ("Giá & thanh toán", "予約", "よやく", "đặt trước; đặt chỗ"),
     ("Hoạt động giải trí", "スポーツ", "スポーツ", "thể thao"), ("Hoạt động giải trí", "サッカー", "サッカー", "bóng đá"), ("Hoạt động giải trí", "テニス", "テニス", "quần vợt"), ("Hoạt động giải trí", "野球", "やきゅう", "bóng chày"), ("Hoạt động giải trí", "読書", "どくしょ", "đọc sách"),
     ("Hoạt động giải trí", "散歩", "さんぽ", "đi dạo"), ("Hoạt động giải trí", "練習", "れんしゅう", "luyện tập"), ("Hoạt động giải trí", "歌", "うた", "bài hát"), ("Hoạt động giải trí", "歌う", "うたう", "hát"), ("Hoạt động giải trí", "ギター", "ギター", "đàn ghi-ta"),
+]
+
+# Bài 53: một nhóm ngữ pháp nhỏ, dùng để ghép câu với các bài trước.
+N5_STAGING_WORDS += [
+    ("Trạng từ & mức độ", "とても", "とても", "rất"),
+    ("Trạng từ & mức độ", "あまり", "あまり", "không ... lắm (thường đi với phủ định)"),
+    ("Trạng từ & mức độ", "いつも", "いつも", "luôn luôn"),
+    ("Trạng từ & mức độ", "よく", "よく", "thường; tốt"),
+    ("Trạng từ & mức độ", "時々", "ときどき", "đôi khi"),
+    ("Trạng từ & mức độ", "もう", "もう", "đã; nữa"),
+    ("Trạng từ & mức độ", "まだ", "まだ", "vẫn; chưa"),
+    ("Trạng từ & mức độ", "一番", "いちばん", "nhất"),
+    ("Trạng từ & mức độ", "全然", "ぜんぜん", "hoàn toàn; không hề (thường đi với phủ định)"),
+    ("Trạng từ & mức độ", "だいたい", "だいたい", "đại khái; thường thường"),
 ]

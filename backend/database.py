@@ -1,7 +1,7 @@
 """SQLite storage and initial data for KanjiAI."""
 from pathlib import Path
 import sqlite3
-from n5_curriculum import LESSONS, WORDS, VOCABULARY_GROUPS, LESSON_GROUPS, STAGING_TOPIC_GROUPS, STAGING_PROMOTIONS, N5_STAGING_WORDS
+from n5_curriculum import LESSONS, WORDS, VOCABULARY_EXAMPLES, VOCABULARY_GROUPS, LESSON_GROUPS, STAGING_TOPIC_GROUPS, STAGING_PROMOTIONS, N5_STAGING_WORDS
 from n5_grammar import LESSONS as GRAMMAR_LESSONS, PATTERNS as GRAMMAR_PATTERNS, EXAMPLES as GRAMMAR_EXAMPLES
 
 DB_PATH = Path(__file__).parent / "kanjiai.db"
@@ -17,8 +17,9 @@ def initialize_database():
         CREATE TABLE IF NOT EXISTS kanji (char TEXT PRIMARY KEY, meaning TEXT NOT NULL, on_reading TEXT NOT NULL, kun_reading TEXT NOT NULL, strokes INTEGER NOT NULL CHECK(strokes > 0), level TEXT NOT NULL, radical TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS lesson_groups (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, japanese_title TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', order_index INTEGER NOT NULL DEFAULT 0, UNIQUE(level, title));
         CREATE TABLE IF NOT EXISTS lessons (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', order_index INTEGER NOT NULL DEFAULT 0, group_id INTEGER REFERENCES lesson_groups(id) ON DELETE SET NULL);
-        CREATE TABLE IF NOT EXISTS vocabulary (id INTEGER PRIMARY KEY AUTOINCREMENT, lesson_id INTEGER REFERENCES lessons(id) ON DELETE SET NULL, word TEXT NOT NULL, reading TEXT NOT NULL, meaning TEXT NOT NULL, level TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS vocabulary (id INTEGER PRIMARY KEY AUTOINCREMENT, lesson_id INTEGER REFERENCES lessons(id) ON DELETE SET NULL, word TEXT NOT NULL, reading TEXT NOT NULL, meaning TEXT NOT NULL, level TEXT NOT NULL, example_japanese TEXT NOT NULL DEFAULT '', example_reading TEXT NOT NULL DEFAULT '', example_meaning TEXT NOT NULL DEFAULT '', audio_url TEXT NOT NULL DEFAULT '');
         CREATE TABLE IF NOT EXISTS vocabulary_staging (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, suggested_topic TEXT NOT NULL, word TEXT NOT NULL, reading TEXT NOT NULL, meaning TEXT NOT NULL, source_note TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'review' CHECK(status IN ('review','approved','rejected')), UNIQUE(level, word, reading));
+        CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS grammar_lessons (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL, order_index INTEGER NOT NULL, UNIQUE(level, title));
         CREATE TABLE IF NOT EXISTS grammar_patterns (id INTEGER PRIMARY KEY AUTOINCREMENT, lesson_id INTEGER NOT NULL REFERENCES grammar_lessons(id) ON DELETE CASCADE, formula TEXT NOT NULL, explanation_vi TEXT NOT NULL, note TEXT NOT NULL, UNIQUE(lesson_id, formula));
         CREATE TABLE IF NOT EXISTS grammar_examples (id INTEGER PRIMARY KEY AUTOINCREMENT, pattern_id INTEGER NOT NULL REFERENCES grammar_patterns(id) ON DELETE CASCADE, japanese TEXT NOT NULL, reading TEXT NOT NULL, meaning_vi TEXT NOT NULL, UNIQUE(pattern_id, japanese));
@@ -35,7 +36,15 @@ def initialize_database():
         lesson_columns = {column["name"] for column in db.execute("PRAGMA table_info(lessons)")}
         if "group_id" not in lesson_columns:
             db.execute("ALTER TABLE lessons ADD COLUMN group_id INTEGER REFERENCES lesson_groups(id) ON DELETE SET NULL")
+        vocabulary_columns = {column["name"] for column in db.execute("PRAGMA table_info(vocabulary)")}
+        for column in ("example_japanese", "example_reading", "example_meaning", "audio_url"):
+            if column not in vocabulary_columns:
+                db.execute(f"ALTER TABLE vocabulary ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
         for kanji in SEED_KANJI: db.execute("INSERT OR IGNORE INTO kanji VALUES (?, ?, ?, ?, ?, ?, ?)", kanji)
+        # The JTest importer replaces only N5 vocabulary. Do not mix the former
+        # KanjiAI seed back into that curated curriculum at each server restart.
+        if db.execute("SELECT 1 FROM app_settings WHERE key='n5_curriculum_source' AND value='jtest'").fetchone():
+            return
         for level, japanese_title, title, description, order_index in VOCABULARY_GROUPS:
             db.execute("""INSERT INTO lesson_groups(level,japanese_title,title,description,order_index)
                 SELECT ?, ?, ?, ?, ? WHERE NOT EXISTS(SELECT 1 FROM lesson_groups WHERE level=? AND title=?)""", (level,japanese_title,title,description,order_index,level,title))
@@ -47,6 +56,9 @@ def initialize_database():
             lesson = db.execute("SELECT id FROM lessons WHERE level='N5' AND title=?", (lesson_title,)).fetchone()
             db.execute("""INSERT INTO vocabulary(lesson_id,word,reading,meaning,level)
                 SELECT ?, ?, ?, ?, 'N5' WHERE NOT EXISTS(SELECT 1 FROM vocabulary WHERE lesson_id=? AND word=? AND reading=?)""", (lesson[0],word,reading,meaning,lesson[0],word,reading))
+        for (word, reading), (example_japanese, example_reading, example_meaning) in VOCABULARY_EXAMPLES.items():
+            db.execute("""UPDATE vocabulary SET example_japanese=?, example_reading=?, example_meaning=?
+                WHERE level='N5' AND word=? AND reading=?""", (example_japanese, example_reading, example_meaning, word, reading))
         for topic, word, reading, meaning in N5_STAGING_WORDS:
             db.execute("""INSERT INTO vocabulary_staging(level,suggested_topic,word,reading,meaning,source_note)
                 SELECT 'N5', ?, ?, ?, ?, 'KanjiAI curated from JMdict/EDICT; needs curriculum review'
