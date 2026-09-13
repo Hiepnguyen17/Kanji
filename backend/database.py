@@ -3,8 +3,17 @@ from pathlib import Path
 import sqlite3
 from n5_curriculum import LESSONS, WORDS, VOCABULARY_EXAMPLES, VOCABULARY_GROUPS, LESSON_GROUPS, STAGING_TOPIC_GROUPS, STAGING_PROMOTIONS, N5_STAGING_WORDS
 from n5_grammar import LESSONS as GRAMMAR_LESSONS, PATTERNS as GRAMMAR_PATTERNS, EXAMPLES as GRAMMAR_EXAMPLES
+from n4_grammar import LESSONS as N4_GRAMMAR_LESSONS, PATTERNS as N4_GRAMMAR_PATTERNS, EXAMPLES as N4_GRAMMAR_EXAMPLES
+from n3_grammar import LESSONS as N3_GRAMMAR_LESSONS, PATTERNS as N3_GRAMMAR_PATTERNS, EXAMPLES as N3_GRAMMAR_EXAMPLES
+from n2_grammar import LESSONS as N2_GRAMMAR_LESSONS, PATTERNS as N2_GRAMMAR_PATTERNS, EXAMPLES as N2_GRAMMAR_EXAMPLES
 
 DB_PATH = Path(__file__).parent / "kanjiai.db"
+GRAMMAR_SEED_VERSION = "n5-topic-path-v2"
+FULL_N5_GRAMMAR_SEED_VERSION = "n5-full-japanese-language-data-v1"
+N4_GRAMMAR_SEED_VERSION = "n4-topic-path-v1"
+FULL_N4_GRAMMAR_SEED_VERSION = "n4-full-japanese-language-data-vi-v1"
+N3_GRAMMAR_SEED_VERSION = "n3-topic-path-v1"
+N2_GRAMMAR_SEED_VERSION = "n2-topic-path-v1"
 SEED_KANJI = [("日","ngày, mặt trời","ニチ・ジツ","ひ・か",4,"N5","日"),("人","người","ジン・ニン","ひと",2,"N5","人"),("学","học","ガク","まな.ぶ",8,"N5","子"),("食","ăn, thực phẩm","ショク・ジキ","た.べる",9,"N5","食"),("水","nước","スイ","みず",4,"N5","水"),("本","sách, gốc","ホン","もと",5,"N5","木"),("会","gặp gỡ, hội","カイ・エ","あ.う",6,"N5","人"),("山","núi","サン","やま",3,"N5","山"),("木","cây, gỗ","モク・ボク","き・こ",4,"N5","木"),("書","viết, sách","ショ","か.く",10,"N5","曰")]
 
 def connect():
@@ -41,9 +50,71 @@ def initialize_database():
             if column not in vocabulary_columns:
                 db.execute(f"ALTER TABLE vocabulary ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
         for kanji in SEED_KANJI: db.execute("INSERT OR IGNORE INTO kanji VALUES (?, ?, ?, ?, ?, ?, ?)", kanji)
-        # The JTest importer replaces only N5 vocabulary. Do not mix the former
-        # KanjiAI seed back into that curated curriculum at each server restart.
-        if db.execute("SELECT 1 FROM app_settings WHERE key='n5_curriculum_source' AND value='jtest'").fetchone():
+        # Grammar is independently versioned so it can evolve even after the
+        # vocabulary curriculum has been imported. Deleting an N5 lesson
+        # cascades only to its patterns/examples, never to vocabulary or kanji.
+        grammar_seed = db.execute("SELECT value FROM app_settings WHERE key='grammar_seed_version'").fetchone()
+        if not grammar_seed or grammar_seed["value"] not in {GRAMMAR_SEED_VERSION, FULL_N5_GRAMMAR_SEED_VERSION}:
+            db.execute("DELETE FROM grammar_lessons WHERE level='N5'")
+            for level, title, description, order_index in GRAMMAR_LESSONS:
+                db.execute("INSERT INTO grammar_lessons(level,title,description,order_index) VALUES (?, ?, ?, ?)", (level,title,description,order_index))
+            for lesson_order, formula, explanation, note in GRAMMAR_PATTERNS:
+                lesson = db.execute("SELECT id FROM grammar_lessons WHERE level='N5' AND order_index=?", (lesson_order,)).fetchone()
+                db.execute("INSERT INTO grammar_patterns(lesson_id,formula,explanation_vi,note) VALUES (?, ?, ?, ?)", (lesson["id"],formula,explanation,note))
+            for formula, japanese, reading, meaning in GRAMMAR_EXAMPLES:
+                pattern = db.execute("""SELECT p.id FROM grammar_patterns p
+                    JOIN grammar_lessons l ON l.id=p.lesson_id
+                    WHERE l.level='N5' AND p.formula=?""", (formula,)).fetchone()
+                if pattern:
+                    db.execute("INSERT INTO grammar_examples(pattern_id,japanese,reading,meaning_vi) VALUES (?, ?, ?, ?)", (pattern["id"],japanese,reading,meaning))
+            db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('grammar_seed_version',?)", (GRAMMAR_SEED_VERSION,))
+        n4_grammar_seed = db.execute("SELECT value FROM app_settings WHERE key='n4_grammar_seed_version'").fetchone()
+        if not n4_grammar_seed or n4_grammar_seed["value"] not in {N4_GRAMMAR_SEED_VERSION, FULL_N4_GRAMMAR_SEED_VERSION}:
+            db.execute("DELETE FROM grammar_lessons WHERE level='N4'")
+            for level, title, description, order_index in N4_GRAMMAR_LESSONS:
+                db.execute("INSERT INTO grammar_lessons(level,title,description,order_index) VALUES (?, ?, ?, ?)", (level,title,description,order_index))
+            for lesson_order, formula, explanation, note in N4_GRAMMAR_PATTERNS:
+                lesson = db.execute("SELECT id FROM grammar_lessons WHERE level='N4' AND order_index=?", (lesson_order,)).fetchone()
+                db.execute("INSERT INTO grammar_patterns(lesson_id,formula,explanation_vi,note) VALUES (?, ?, ?, ?)", (lesson["id"],formula,explanation,note))
+            for formula, japanese, reading, meaning in N4_GRAMMAR_EXAMPLES:
+                pattern = db.execute("""SELECT p.id FROM grammar_patterns p
+                    JOIN grammar_lessons l ON l.id=p.lesson_id
+                    WHERE l.level='N4' AND p.formula=?""", (formula,)).fetchone()
+                if pattern:
+                    db.execute("INSERT INTO grammar_examples(pattern_id,japanese,reading,meaning_vi) VALUES (?, ?, ?, ?)", (pattern["id"],japanese,reading,meaning))
+            db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('n4_grammar_seed_version',?)", (N4_GRAMMAR_SEED_VERSION,))
+        n3_grammar_seed = db.execute("SELECT value FROM app_settings WHERE key='n3_grammar_seed_version'").fetchone()
+        if not n3_grammar_seed or n3_grammar_seed["value"] != N3_GRAMMAR_SEED_VERSION:
+            db.execute("DELETE FROM grammar_lessons WHERE level='N3'")
+            for level, title, description, order_index in N3_GRAMMAR_LESSONS:
+                db.execute("INSERT INTO grammar_lessons(level,title,description,order_index) VALUES (?, ?, ?, ?)", (level,title,description,order_index))
+            for lesson_order, formula, explanation, note in N3_GRAMMAR_PATTERNS:
+                lesson = db.execute("SELECT id FROM grammar_lessons WHERE level='N3' AND order_index=?", (lesson_order,)).fetchone()
+                db.execute("INSERT INTO grammar_patterns(lesson_id,formula,explanation_vi,note) VALUES (?, ?, ?, ?)", (lesson["id"],formula,explanation,note))
+            for formula, japanese, reading, meaning in N3_GRAMMAR_EXAMPLES:
+                pattern = db.execute("""SELECT p.id FROM grammar_patterns p
+                    JOIN grammar_lessons l ON l.id=p.lesson_id
+                    WHERE l.level='N3' AND p.formula=?""", (formula,)).fetchone()
+                if pattern:
+                    db.execute("INSERT INTO grammar_examples(pattern_id,japanese,reading,meaning_vi) VALUES (?, ?, ?, ?)", (pattern["id"],japanese,reading,meaning))
+            db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('n3_grammar_seed_version',?)", (N3_GRAMMAR_SEED_VERSION,))
+        n2_grammar_seed = db.execute("SELECT value FROM app_settings WHERE key='n2_grammar_seed_version'").fetchone()
+        if not n2_grammar_seed or n2_grammar_seed["value"] != N2_GRAMMAR_SEED_VERSION:
+            db.execute("DELETE FROM grammar_lessons WHERE level='N2'")
+            for level, title, description, order_index in N2_GRAMMAR_LESSONS:
+                db.execute("INSERT INTO grammar_lessons(level,title,description,order_index) VALUES (?, ?, ?, ?)", (level,title,description,order_index))
+            for lesson_order, formula, explanation, note in N2_GRAMMAR_PATTERNS:
+                lesson = db.execute("SELECT id FROM grammar_lessons WHERE level='N2' AND order_index=?", (lesson_order,)).fetchone()
+                db.execute("INSERT INTO grammar_patterns(lesson_id,formula,explanation_vi,note) VALUES (?, ?, ?, ?)", (lesson["id"],formula,explanation,note))
+            for formula, japanese, reading, meaning in N2_GRAMMAR_EXAMPLES:
+                pattern = db.execute("""SELECT p.id FROM grammar_patterns p
+                    JOIN grammar_lessons l ON l.id=p.lesson_id
+                    WHERE l.level='N2' AND p.formula=?""", (formula,)).fetchone()
+                if pattern:
+                    db.execute("INSERT INTO grammar_examples(pattern_id,japanese,reading,meaning_vi) VALUES (?, ?, ?, ?)", (pattern["id"],japanese,reading,meaning))
+            db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('n2_grammar_seed_version',?)", (N2_GRAMMAR_SEED_VERSION,))
+        # An imported N5 curriculum replaces the starter seed permanently.
+        if db.execute("SELECT 1 FROM app_settings WHERE key='n5_curriculum_imported' AND value='1'").fetchone():
             return
         for level, japanese_title, title, description, order_index in VOCABULARY_GROUPS:
             db.execute("""INSERT INTO lesson_groups(level,japanese_title,title,description,order_index)
@@ -107,11 +178,3 @@ def initialize_database():
             # A previous seed placed 犬 in the family lesson. Keep only one identical card.
             db.execute("""DELETE FROM vocabulary WHERE lesson_id=? AND word='犬' AND reading='いぬ'
                 AND id NOT IN (SELECT MIN(id) FROM vocabulary WHERE lesson_id=? AND word='犬' AND reading='いぬ')""", (animals[0], animals[0]))
-        for level, title, description, order_index in GRAMMAR_LESSONS:
-            db.execute("INSERT OR IGNORE INTO grammar_lessons(level,title,description,order_index) VALUES (?, ?, ?, ?)", (level,title,description,order_index))
-        for lesson_order, formula, explanation, note in GRAMMAR_PATTERNS:
-            lesson = db.execute("SELECT id FROM grammar_lessons WHERE level='N5' AND order_index=?", (lesson_order,)).fetchone()
-            db.execute("INSERT OR IGNORE INTO grammar_patterns(lesson_id,formula,explanation_vi,note) VALUES (?, ?, ?, ?)", (lesson[0],formula,explanation,note))
-        for pattern_offset, (_, japanese, reading, meaning) in enumerate(GRAMMAR_EXAMPLES):
-            pattern = db.execute("SELECT id FROM grammar_patterns ORDER BY id LIMIT 1 OFFSET ?", (pattern_offset,)).fetchone()
-            db.execute("INSERT OR IGNORE INTO grammar_examples(pattern_id,japanese,reading,meaning_vi) VALUES (?, ?, ?, ?)", (pattern[0],japanese,reading,meaning))

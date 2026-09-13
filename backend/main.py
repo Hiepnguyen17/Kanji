@@ -10,7 +10,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 from database import connect, initialize_database
 try:
-    from recognizer import model_status, recognize, recognize_rasterized_png, recognize_rasterized_strokes
+    from recognizer import hanzi_model_status, model_status, recognize, recognize_hanzi_rasterized_png, recognize_rasterized_png, recognize_rasterized_strokes
     ML_IMPORT_ERROR = None
 except ModuleNotFoundError as error:
     # Keep the vocabulary API available if an optional ML package is not yet
@@ -20,6 +20,9 @@ except ModuleNotFoundError as error:
     def model_status():
         return {"model_status": "dependencies_missing", "labels": 0, "validation_accuracy": None}
 
+    def hanzi_model_status():
+        return {"model_status": "dependencies_missing", "labels": 0, "validation_accuracy": None}
+
     def recognize(_: bytes, __: int):
         return []
 
@@ -27,6 +30,9 @@ except ModuleNotFoundError as error:
         return []
 
     def recognize_rasterized_png(_: bytes, __: int):
+        return []
+
+    def recognize_hanzi_rasterized_png(_: bytes, __: int):
         return []
 
 @asynccontextmanager
@@ -45,6 +51,7 @@ class RecognitionRequest(BaseModel):
     top_k: int = Field(default=3, ge=1, le=3)
     stroke_count: int | None = Field(default=None, ge=1, le=40)
     expected_text: str | None = Field(default=None, max_length=20)
+    language: str = Field(default="ja", pattern="^(ja|zh)$")
 
 class HandwritingSampleCreate(BaseModel):
     image: str
@@ -255,7 +262,9 @@ def recognition(request: RecognitionRequest):
     # Request more candidates so a correct, stroke-compatible character can
     # move into the visible top three without excluding generic DaKanji output.
     try:
-        if request.image and request.rasterized:
+        if request.language == "zh" and request.image and request.rasterized:
+            predictions = recognize_hanzi_rasterized_png(canvas_png(request.image), request.top_k)
+        elif request.image and request.rasterized:
             predictions = recognize_rasterized_png(canvas_png(request.image), 30)
         elif request.strokes is not None:
             predictions = recognize_rasterized_strokes(rasterize_strokes(request.strokes, request.canvas_size), 30)
@@ -265,14 +274,15 @@ def recognition(request: RecognitionRequest):
             raise HTTPException(422, "Hãy gửi ảnh hoặc dữ liệu nét viết")
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
-    predictions = rank_with_stroke_count(predictions, request.stroke_count)[:request.top_k]
-    status_info = model_status()
+    if request.language == "ja":
+        predictions = rank_with_stroke_count(predictions, request.stroke_count)[:request.top_k]
+    status_info = hanzi_model_status() if request.language == "zh" else model_status()
     if not predictions:
         message = "AI đang thu thập mẫu; chưa có mô hình đã huấn luyện để nhận diện."
         if ML_IMPORT_ERROR:
             message = "Thiếu gói AI trong môi trường backend. Hãy cài backend/requirements-ml.txt."
         return {"predictions": [], "uncertain": True, **status_info, "message": message}
-    return {"predictions": predictions, "uncertain": predictions[0]["confidence"] < 0.7, **status_info}
+    return {"predictions": predictions, "language": request.language, "uncertain": predictions[0]["confidence"] < 0.7, **status_info}
 
 @app.get("/api/handwriting/status")
 def handwriting_status():

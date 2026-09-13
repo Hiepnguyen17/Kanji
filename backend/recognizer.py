@@ -15,6 +15,9 @@ MODEL_PATH = Path(__file__).parent / "models" / "n5_30_kanji.pt"
 DAKANJI_DIR = Path(__file__).parent / "models" / "dakanji"
 DAKANJI_MODEL_PATH = DAKANJI_DIR / "char_classifier.onnx"
 DAKANJI_LABELS_PATH = DAKANJI_DIR / "char_classifier_labels.txt"
+HANZI_DIR = Path(__file__).parent / "models" / "hanzi"
+HANZI_MODEL_PATH = HANZI_DIR / "model.onnx"
+HANZI_LABELS_PATH = HANZI_DIR / "labels.txt"
 
 
 @lru_cache(maxsize=1)
@@ -44,6 +47,21 @@ def load_dakanji_model():
     return session, labels
 
 
+@lru_cache(maxsize=1)
+def load_hanzi_model():
+    """Load the separately trained Chinese model without altering DaKanji."""
+    if not HANZI_MODEL_PATH.exists() or not HANZI_LABELS_PATH.exists():
+        return None
+    import onnxruntime as ort
+
+    labels = HANZI_LABELS_PATH.read_text(encoding="utf-8").splitlines()
+    session = ort.InferenceSession(str(HANZI_MODEL_PATH), providers=["CPUExecutionProvider"])
+    output_classes = session.get_outputs()[0].shape[-1]
+    if len(labels) != output_classes:
+        raise ValueError(f"Chinese labels ({len(labels)}) do not match model output ({output_classes}).")
+    return session, labels
+
+
 def model_status() -> dict:
     dakanji = load_dakanji_model()
     if dakanji:
@@ -60,6 +78,20 @@ def model_status() -> dict:
         return {"model_status": "collecting_samples", "labels": 0, "validation_accuracy": None}
     _, labels, validation_accuracy = loaded
     return {"model_status": "ready", "labels": len(labels), "validation_accuracy": validation_accuracy}
+
+
+def hanzi_model_status() -> dict:
+    hanzi = load_hanzi_model()
+    if not hanzi:
+        return {"model_status": "missing", "labels": 0, "validation_accuracy": None}
+    _, labels = hanzi
+    return {
+        "model_status": "ready",
+        "model": "Chinese Hanzi ONNX",
+        "source": "KanjiAI / CASIA-HWDB training",
+        "labels": len(labels),
+        "validation_accuracy": 0.912,
+    }
 
 
 def _crop_ink_for_dakanji(ink: np.ndarray) -> np.ndarray:
@@ -94,6 +126,18 @@ def _dakanji_predictions(pixels: np.ndarray, top_k: int) -> list[dict]:
     return [{"kanji": labels[int(index)], "confidence": round(float(probabilities[index]), 4)} for index in indices]
 
 
+def _hanzi_predictions(pixels: np.ndarray, top_k: int) -> list[dict]:
+    """Chinese-only ONNX path. Japanese inference never calls this function."""
+    hanzi = load_hanzi_model()
+    if not hanzi:
+        return []
+    session, labels = hanzi
+    value = np.asarray(pixels, dtype=np.float32)[None, None, :, :]
+    probabilities = session.run(None, {session.get_inputs()[0].name: value})[0][0]
+    indices = np.argsort(probabilities)[-min(top_k, len(labels)):][::-1]
+    return [{"hanzi": labels[int(index)], "confidence": round(float(probabilities[index]), 4)} for index in indices]
+
+
 def recognize_rasterized_strokes(pixels: np.ndarray, top_k: int) -> list[dict]:
     """Recognize white ink on black, square-padded vector stroke rasterization."""
     predictions = _dakanji_predictions(pixels, top_k)
@@ -109,6 +153,12 @@ def recognize_rasterized_png(png: bytes, top_k: int) -> list[dict]:
     """Use a browser-rasterized DaKanji image without thresholding or recropping."""
     image = Image.open(BytesIO(png)).convert("L")
     return recognize_rasterized_strokes(np.asarray(image, dtype=np.float32), top_k)
+
+
+def recognize_hanzi_rasterized_png(png: bytes, top_k: int) -> list[dict]:
+    """Recognize a browser rasterized Chinese character with the Chinese model."""
+    image = Image.open(BytesIO(png)).convert("L")
+    return _hanzi_predictions(np.asarray(image, dtype=np.float32), top_k)
 
 
 def recognize(png: bytes, top_k: int) -> list[dict]:

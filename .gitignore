@@ -9,3 +9,6 @@ __pycache__/
 backend/__pycache__/
 node_modules/
 .vite/
+
+# Temporary clone used only to run the open grammar-data importer.
+.grammar-data-source/
