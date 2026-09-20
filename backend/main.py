@@ -59,7 +59,7 @@ class HandwritingSampleCreate(BaseModel):
     source: str = Field(default="flashcard", pattern="^(flashcard|lookup)$")
 class KanjiCreate(BaseModel):
     char: str = Field(min_length=1, max_length=1); meaning: str = Field(min_length=1); on_reading: str; kun_reading: str
-    strokes: int = Field(ge=1, le=99); level: str = Field(pattern="^N[1-5]$"); radical: str = Field(min_length=1)
+    strokes: int = Field(ge=1, le=99); level: str = Field(pattern="^N[1-5]$"); radical: str = Field(min_length=1); han_viet: str = ""
 class LessonCreate(BaseModel):
     level: str = Field(pattern="^N[1-5]$"); title: str = Field(min_length=1, max_length=120); description: str = ""; order_index: int = Field(default=0, ge=0)
 class VocabularyCreate(BaseModel):
@@ -163,7 +163,7 @@ def health(): return {"status":"ok", "model": model_status(), "database":"sqlite
 def list_kanji(level: str | None = None):
     query, values = "SELECT * FROM kanji", []
     if level: query += " WHERE level = ?"; values.append(level.upper())
-    with connect() as db: return [row(x) for x in db.execute(query + " ORDER BY char", values).fetchall()]
+    with connect() as db: return [row(x) for x in db.execute(query + " ORDER BY CASE WHEN order_index=0 THEN 1 ELSE 0 END, order_index, char", values).fetchall()]
 
 @app.get("/kanji/{char}")
 def kanji_detail(char: str):
@@ -173,7 +173,19 @@ def kanji_detail(char: str):
 
 @app.get("/kanji/{char}/related-words")
 def related_words(char: str):
-    with connect() as db: return [row(x) for x in db.execute("SELECT * FROM vocabulary WHERE word LIKE ? ORDER BY id", (f"%{char}%",)).fetchall()]
+    with connect() as db:
+        curated = db.execute("""SELECT word, reading, meaning, order_index
+            FROM kanji_related_words WHERE kanji=? ORDER BY order_index""", (char,)).fetchall()
+        if curated:
+            return [row(item) for item in curated]
+        # Keep lookup useful for characters that do not yet have curated data.
+        return [row(item) for item in db.execute("SELECT word, reading, meaning FROM vocabulary WHERE word LIKE ? ORDER BY id LIMIT 8", (f"%{char}%",)).fetchall()]
+
+@app.get("/kanji/{char}/related-kanji")
+def related_kanji(char: str):
+    with connect() as db:
+        return [row(item) for item in db.execute("""SELECT related_char, meaning, order_index
+            FROM kanji_related_characters WHERE kanji=? ORDER BY order_index""", (char,)).fetchall()]
 
 @app.get("/vocabulary")
 def vocabulary(level: str | None = None, lesson_id: int | None = None):
@@ -241,7 +253,8 @@ def grammar_lesson_detail(lesson_id: int):
 @app.post("/admin/kanji", status_code=status.HTTP_201_CREATED)
 def add_kanji(item: KanjiCreate):
     try:
-        with connect() as db: db.execute("INSERT INTO kanji VALUES (?, ?, ?, ?, ?, ?, ?)", tuple(item.model_dump().values()))
+        with connect() as db: db.execute("""INSERT INTO kanji(char,meaning,on_reading,kun_reading,strokes,level,radical,han_viet)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", tuple(item.model_dump().values()))
     except Exception as error: raise HTTPException(409, "Kanji này đã tồn tại") from error
     return item
 

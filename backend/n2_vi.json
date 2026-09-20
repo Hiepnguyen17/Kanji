@@ -1,0 +1,598 @@
+{
+  "ni-atatte-occasion": {
+    "example": "Nhân dịp năm mới, tôi xin gửi lời chúc mừng.",
+    "meaning": "nhân dịp/ tại thời điểm (chính thức)"
+  },
+  "ni-sakidatte-prior": {
+    "example": "Trước cuộc họp, tôi đã phân phát tài liệu.",
+    "meaning": "trước /trước"
+  },
+  "wo-kikkake-ni": {
+    "meaning": "được kích hoạt bởi / với X là động lực",
+    "example": "Một chuyến đi đến Nhật Bản đã khiến tôi bắt đầu học tiếng Nhật."
+  },
+  "wo-keiki-ni": {
+    "meaning": "lấy X làm cơ hội /được thúc đẩy bởi",
+    "example": "Được thúc đẩy bởi vụ tai nạn, các biện pháp an toàn đã được tăng cường."
+  },
+  "ni-tsuki-due-to": {
+    "example": "Vì hôm nay là ngày đóng cửa thông thường của chúng tôi, chúng tôi đóng cửa.",
+    "meaning": "do / vì / mỗi"
+  },
+  "yue-ni-because": {
+    "meaning": "bởi vì / do đó (văn viết)",
+    "example": "Tôi tư duy, vậy tôi tồn tại."
+  },
+  "koto-kara-from-fact": {
+    "meaning": "từ thực tế là / dựa trên thực tế",
+    "example": "Từ việc có nhiều cây anh đào, thị trấn này được gọi là 'Thị trấn Sakura'."
+  },
+  "amari-too-much": {
+    "example": "Vì quá ngạc nhiên, tôi đã không thể thốt nên lời.",
+    "meaning": "vượt quá / từ quá nhiều"
+  },
+  "ba-koso-precisely-because": {
+    "example": "Chính vì anh yêu em nên anh mới nói điều này.",
+    "meaning": "chính xác là bởi vì /chỉ bởi vì"
+  },
+  "kara-koso-precisely-because": {
+    "example": "Chính vì bạn là một người bạn thân nên tôi cũng nói những điều khắc nghiệt.",
+    "meaning": "chính xác bởi vì / nó chính xác bởi vì"
+  },
+  "ni-tomonatte-accompany": {
+    "meaning": "đi kèm / cùng với / khi X tiến triển",
+    "example": "Cùng với tỷ lệ sinh giảm, số lượng trường học đang giảm."
+  },
+  "ni-oujite-depending": {
+    "meaning": "tùy thuộc vào/để đáp ứng/ phù hợp với",
+    "example": "Công việc được đưa ra theo khả năng."
+  },
+  "ni-kotaete-response": {
+    "example": "Đáp lại sự cổ vũ của khán giả, các vận động viên đã nỗ lực hết mình.",
+    "meaning": "để đáp ứng/ đáp ứng (kỳ vọng, yêu cầu)"
+  },
+  "ni-kakawarazu-regardless": {
+    "meaning": "bất kể / không phân biệt",
+    "example": "Bất kể tuổi tác, bất kỳ ai cũng có thể tham gia."
+  },
+  "ni-mo-kakawarazu-despite": {
+    "example": "Bất chấp thời tiết xấu, trận đấu đã được tổ chức.",
+    "meaning": "mặc dù /mặc dù/ mặc dù"
+  },
+  "wo-towazu-regardless": {
+    "meaning": "bất kể / không liên quan đến",
+    "example": "Bất kể giới tính, bạn đều có thể nộp đơn."
+  },
+  "wa-tomokaku": {
+    "meaning": "đặt X sang một bên / đặt X sang một bên / bất kể",
+    "example": "Đặt giá sang một bên, hãy kiểm tra chất lượng."
+  },
+  "wa-sate-oki": {
+    "meaning": "đặt X sang một bên (chính thức)",
+    "example": "Gạt chuyện cười sang một bên, chúng ta hãy nói chuyện nghiêm túc."
+  },
+  "ni-kagitte-only": {
+    "meaning": "của tất cả (sự vật/con người/thời gian) / chính xác khi nào",
+    "example": "Trong tất cả các lần, tàu bị trì hoãn khi tôi đang vội."
+  },
+  "ni-kagirazu-not-only": {
+    "meaning": "không chỉ giới hạn ở/ không chỉ X (mà còn)",
+    "example": "Không chỉ ở Nhật Bản — vấn đề này tồn tại trên toàn thế giới."
+  },
+  "zu-ni-wa-irarenai": {
+    "meaning": "không thể kìm được / không thể ngừng làm",
+    "example": "Thật buồn cười, tôi không nhịn được cười."
+  },
+  "nai-dewa-irarenai": {
+    "meaning": "không thể không làm /không thể ngăn mình khỏi (biến thể thông thường)",
+    "example": "Thật buồn cười — tôi không thể không cười."
+  },
+  "te-wa-irarenai": {
+    "example": "Tôi không thể cứ thế này được. Hãy nhanh lên.",
+    "meaning": "không đủ khả năng để (làm X) /không thể ở lại (ở trạng thái X)"
+  },
+  "ni-shiro-ni-seyo": {
+    "meaning": "ngay cả khi / có hoặc không (chính thức)",
+    "example": "Dù bạn có đi hay không, vui lòng quyết định nhanh chóng."
+  },
+  "toshite-mo-even-as": {
+    "meaning": "ngay cả khi / thậm chí giả định / ngay cả khi",
+    "example": "Ngay cả khi tôi thất bại, nó sẽ trở thành kinh nghiệm."
+  },
+  "you-to-regardless": {
+    "meaning": "bất kể/ không có vấn đề gì (cái gì / ai / như thế nào)",
+    "example": "Bất kể ai nói gì, tôi sẽ không bỏ cuộc."
+  },
+  "you-to-mai-to": {
+    "meaning": "có hay không (một người) X",
+    "example": "Dù bạn có đi hay không, điều đó tùy thuộc vào bạn."
+  },
+  "mai-not-likely": {
+    "example": "Chúng ta sẽ không bao giờ gặp lại nhau nữa...",
+    "meaning": "sẽ không / có thể không /có ý định không"
+  },
+  "nuku-fully-do": {
+    "meaning": "làm X đến tận cùng / triệt để",
+    "example": "Tôi chạy đến tận cùng."
+  },
+  "kane-nai-might": {
+    "meaning": "might / could (something bad)",
+    "example": "Nếu bạn thúc ép bản thân mạnh mẽ như vậy, bạn có thể bị bệnh."
+  },
+  "kane-ru-hard-to": {
+    "meaning": "không thể (hoàn toàn) / khó / khó",
+    "example": "Tôi không thể trả lời câu hỏi đó."
+  },
+  "dzurai-hard-emotional": {
+    "meaning": "khó thực hiện (về mặt cảm xúc / không thoải mái)",
+    "example": "Đó là một chủ đề hơi khó xử để đưa ra."
+  },
+  "gatai-difficult": {
+    "meaning": "khó / khó (chính thức)",
+    "example": "Đó là một câu chuyện khó tin."
+  },
+  "beku-in-order-to": {
+    "meaning": "để / cho mục đích (văn học)",
+    "example": "Để thực hiện ước mơ của mình, tôi làm việc chăm chỉ mỗi ngày."
+  },
+  "wa-mochiron": {
+    "meaning": "không đề cập đến / tất nhiên / không cần phải nói",
+    "example": "Nó phổ biến không chỉ với người Nhật mà còn với người nước ngoài."
+  },
+  "wo-tsuujite-through": {
+    "meaning": "thông qua / thông qua / trong suốt (tất cả)",
+    "example": "Tôi được giới thiệu với anh ấy thông qua một người bạn."
+  },
+  "ni-wataru-span": {
+    "meaning": "trải suốt / kéo dài trong một khoảng thời gian hoặc phạm vi",
+    "example": "Tôi tiếp tục nghiên cứu trong 10 năm."
+  },
+  "wo-chuushin-ni-centered": {
+    "meaning": "tập trung vào / tập trung vào / chủ yếu",
+    "example": "Chúng tôi đã thảo luận, tập trung vào các vấn đề môi trường."
+  },
+  "wo-komete": {
+    "example": "Tôi đã viết bức thư với tình yêu.",
+    "meaning": "với (cảm giác) / đặt (cảm giác) vào"
+  },
+  "ni-shite-wa": {
+    "example": "Lần thử đầu tiên, tôi đã chơi tốt.",
+    "meaning": "cho (a) / xem xét X (đáng ngạc nhiên)"
+  },
+  "ni-shite": {
+    "meaning": "tại (điểm) / là (X), (nhấn mạnh)",
+    "example": "Ở tuổi 80, ông vẫn tràn đầy năng lượng."
+  },
+  "sue-ni-after": {
+    "meaning": "sau (một quá trình dài) / vào cuối",
+    "example": "Sau một thời gian dài đau khổ, tôi quyết định đi du học."
+  },
+  "dake-no-koto-wa-aru": {
+    "example": "Những năm thực hành đã được đền đáp. Buổi biểu diễn thật tuyệt vời.",
+    "meaning": "(nó) như mong đợi từ / sống đến"
+  },
+  "made-mo-nai": {
+    "example": "Không cần phải nói, thủ đô của Nhật Bản là Tokyo.",
+    "meaning": "không cần chẵn / không đáng (làm)"
+  },
+  "to-iu-mono-da": {
+    "example": "Giúp đỡ một người bạn đang gặp khó khăn — đó chính là tình bạn.",
+    "meaning": "đó là những gì X là / đó là (bản chất của) X"
+  },
+  "to-iu-mono-dewa-nai": {
+    "meaning": "nó không chỉ đơn giản là (một vấn đề) / nó không phải là",
+    "example": "Không chỉ đơn giản là có tiền khiến bạn hạnh phúc."
+  },
+  "mono-dakara": {
+    "meaning": "vì / bởi vì (mang sắc thái thanh minh)",
+    "example": "Bởi vì tôi đang vội, tôi rời đi mà không nói lời tạm biệt."
+  },
+  "yara-yara": {
+    "meaning": "những thứ như X và Y (rối loạn / áp đảo)",
+    "example": "Tôi đang bận làm bài tập về nhà và dọn dẹp và những thứ linh tinh khác."
+  },
+  "kara-shite": {
+    "meaning": "đánh giá từ / bắt đầu với (như một ví dụ đại diện)",
+    "example": "Người đó thật thô lỗ — chỉ từ cách họ nói, bạn có thể nói."
+  },
+  "kara-suru-to": {
+    "meaning": "từ quan điểm của X/ đánh giá từ",
+    "example": "Từ quan điểm của một chuyên gia, vấn đề này rất dễ dàng."
+  },
+  "kara-ni-wa": {
+    "meaning": "bây giờ/ từ đó (với nghĩa vụ mạnh mẽ)",
+    "example": "Bây giờ tôi đã hứa, tôi chắc chắn sẽ giữ lời."
+  },
+  "no-minarazu": {
+    "meaning": "không chỉ X mà còn Y (văn học)",
+    "example": "Anh ấy không chỉ thông minh mà còn có tính cách tốt."
+  },
+  "to-wa-ie": {
+    "example": "Mặc dù đã là mùa xuân nhưng trời vẫn lạnh.",
+    "meaning": "mặc dù / điều đó đã nói / thậm chí như vậy"
+  },
+  "to-wa-iu-mono-no": {
+    "example": "Mặc dù chúng tôi nói đó là mùa xuân, nhưng sáng nay tuyết đã rơi.",
+    "meaning": "điều đó đã nói / mặc dù một người nói"
+  },
+  "ni-shite-mireba": {
+    "meaning": "từ quan điểm của X/ từ quan điểm của X",
+    "example": "Theo quan điểm của một đứa trẻ, đó là một phản ứng tự nhiên."
+  },
+  "kara-to-itte": {
+    "example": "Chỉ vì bạn có tiền không nhất thiết có nghĩa là bạn đang hạnh phúc.",
+    "meaning": "chỉ vì /mặc dù (một người nói)"
+  },
+  "koto-dakara": {
+    "meaning": "biết X / cho rằng đó là X",
+    "example": "Biết ông Tanaka, người nghiêm khắc về thời gian, chắc chắn ông ấy sẽ đến đúng giờ."
+  },
+  "te-kara-to-iu-mono": {
+    "example": "Kể từ khi tôi đến Nhật Bản, mỗi ngày đều rất thú vị.",
+    "meaning": "kể từ / kể từ thời điểm đó"
+  },
+  "tsutsu-aru": {
+    "example": "Sự nóng lên toàn cầu đang diễn ra.",
+    "meaning": "trong quá trình/ dần dần trở thành"
+  },
+  "dake-mashi-da": {
+    "meaning": "ít nhất X (tốt hơn là không có gì) / có thể tồi tệ hơn",
+    "example": "Trời đang mưa, nhưng ít nhất trời không có tuyết."
+  },
+  "ya-inaya": {
+    "meaning": "ngay sau/thời điểm đó (văn học)",
+    "example": "Ngay khi về đến nhà, anh ấy đã gục xuống giường."
+  },
+  "ka-nai-ka-no-uchi-ni": {
+    "meaning": "không sớm hơn (có X) so với Y / hầu như không có một Xed khi Y",
+    "example": "Tôi vừa về đến nhà thì trời bắt đầu mưa."
+  },
+  "sobakara": {
+    "meaning": "ngay sau/ ngay sau đó (với việc hoàn tác lặp đi lặp lại)",
+    "example": "Anh ấy quên ngay khi tôi dạy anh ấy."
+  },
+  "ja-arumai-shi": {
+    "meaning": "nó không giống như / vì nó không giống như",
+    "example": "Bạn không phải là một đứa trẻ — đừng khóc vì điều đó."
+  },
+  "to-bakari-ni": {
+    "meaning": "như thể muốn nói / dường như đang nói",
+    "example": "Anh thở dài như thể muốn nói 'Tôi đã chịu đựng đủ rồi'."
+  },
+  "to-areba": {
+    "meaning": "nếu đó là (một trường hợp) / nếu đó là cho",
+    "example": "Nếu là vì bạn, tôi sẽ làm bất cứ điều gì."
+  },
+  "nai-made-mo": {
+    "meaning": "ngay cả khi không hoàn toàn X / không nhất thiết X, nhưng ít nhất",
+    "example": "Tôi sẽ không gọi nó là hoàn hảo, nhưng nó đã được thực hiện khá tốt."
+  },
+  "no-moto-de": {
+    "example": "Tôi học piano dưới sự hướng dẫn của một giáo viên nổi tiếng.",
+    "meaning": "theo (hướng dẫn / điều kiện / sự bảo trợ của)"
+  },
+  "sou-ni-nai": {
+    "meaning": "không giống như /không có dấu hiệu của",
+    "example": "Có vẻ như trời sẽ không mưa."
+  },
+  "zu-jimai": {
+    "meaning": "đã kết thúc không (làm) / không quản lý để",
+    "example": "Tôi bận đến nỗi không thể gặp được anh ấy."
+  },
+  "ta-tokoro-de": {
+    "meaning": "ngay cả khi / không có vấn đề gì nếu (nỗ lực vô ích)",
+    "example": "Ngay cả khi bạn xin lỗi bây giờ, bạn sẽ không được tha thứ."
+  },
+  "nani-shiro": {
+    "meaning": "sau tất cả / bạn thấy đấy / đó là bởi vì",
+    "example": "Rốt cuộc, anh ta có rất nhiều kinh nghiệm."
+  },
+  "nani-se": {
+    "meaning": "sau tất cả / vấn đề là",
+    "example": "Dù sao thì cũng đã lâu rồi nên tôi không nhớ rõ lắm."
+  },
+  "ageku-ni-end-up": {
+    "example": "Sau khi không ngừng lo lắng, cuối cùng tôi cũng không thể quyết định được gì.",
+    "meaning": "cuối cùng / sau tất cả / cuối cùng (kết quả âm tính)"
+  },
+  "hanmen-on-other-hand": {
+    "example": "Công việc này được trả lương cao, nhưng mặt khác, trách nhiệm nặng nề.",
+    "meaning": "mặt khác/ trong khi (một bên)"
+  },
+  "kara-miru-to": {
+    "meaning": "từ quan điểm của / từ quan điểm của X",
+    "example": "Theo quan điểm của người nước ngoài, Nhật Bản là một quốc gia an toàn."
+  },
+  "to-iu-koto-da": {
+    "meaning": "Tôi nghe điều đó / nó có nghĩa là",
+    "example": "Theo tin tức, ngày mai trời sẽ mưa."
+  },
+  "kekka-result": {
+    "meaning": "là kết quả của / sau",
+    "example": "Nhờ kết quả điều tra của chúng tôi, các sự kiện mới đã được đưa ra ánh sáng."
+  },
+  "shidai-de": {
+    "meaning": "tùy thuộc vào / theo",
+    "example": "Tôi sẽ thay đổi kế hoạch tùy thuộc vào thời tiết."
+  },
+  "ni-itaru": {
+    "meaning": "đạt / đến / đến",
+    "example": "Kết quả của cuộc thảo luận, chúng tôi đã đạt được một thỏa thuận."
+  },
+  "ni-itaru-made": {
+    "meaning": "thậm chí đến / tất cả các cách đến / như xa như",
+    "example": "Tất cả mọi người, từ trẻ em cho đến người già, đều có thể tận hưởng nó."
+  },
+  "sai-ni": {
+    "meaning": "nhân dịp/ tại thời điểm (chính thức)",
+    "example": "Trong trường hợp khẩn cấp, nhấn nút này."
+  },
+  "wo-hete": {
+    "meaning": "sau khi trải qua / thông qua / thông qua (một quy trình)",
+    "example": "Sau nhiều năm nghiên cứu, cuối cùng chúng tôi đã phát hiện ra nó."
+  },
+  "wo-fumaete": {
+    "meaning": "dựa trên /có tính đến/ theo quan điểm của",
+    "example": "Dựa trên tình hình hiện tại, chúng tôi đã xây dựng một biện pháp đối phó."
+  },
+  "wo-yoso-ni": {
+    "meaning": "bỏ qua /không quan tâm đến",
+    "example": "Bất chấp những lo lắng của cha mẹ, anh lên đường một mình trong một chuyến đi."
+  },
+  "doori-just-as": {
+    "example": "Chúng tôi khởi hành đúng như kế hoạch.",
+    "meaning": "giống như / theo như/ chính xác như"
+  },
+  "ikan-depending": {
+    "meaning": "tùy thuộc vào/ theo (chính thức)",
+    "example": "Tùy thuộc vào kết quả, chúng tôi sẽ quyết định chính sách trong tương lai."
+  },
+  "uru-possible": {
+    "meaning": "có thể / có thể / có khả năng",
+    "example": "Một cái gì đó như thế này có thể xảy ra."
+  },
+  "to-atte": {
+    "example": "Là một kỳ nghỉ, công viên đông đúc với nhiều người.",
+    "meaning": "bởi vì nó / cho rằng nó (tình huống đặc biệt)"
+  },
+  "te-kara-denai-to": {
+    "meaning": "không cho đến sau / trừ khi bạn là người đầu tiên",
+    "example": "Chúng ta không thể bắt đầu cho đến khi nghe lời giải thích."
+  },
+  "nai-koto-niwa": {
+    "meaning": "trừ khi / không làm (X, không thể làm Y)",
+    "example": "Trừ khi tôi thực sự nhìn thấy nó, tôi không thể nói."
+  },
+  "to-mieru": {
+    "meaning": "có vẻ như / dường như",
+    "example": "Có vẻ như anh ấy đang bận."
+  },
+  "to-sureba": {
+    "meaning": "giả sử / giả định / nếu đó là trường hợp",
+    "example": "Giả sử trời mưa, bạn sẽ làm gì?"
+  },
+  "wa-oroka": {
+    "meaning": "hãy để một mình / không đề cập đến",
+    "example": "Chưa kể đến chữ Hán, tôi thậm chí còn không thể viết hiragana."
+  },
+  "ni-suginai": {
+    "example": "Đó chỉ là một cái cớ.",
+    "meaning": "không có gì hơn / chỉ đơn thuần là"
+  },
+  "tatte-even-casual": {
+    "meaning": "ngay cả khi (bình thường)",
+    "example": "Tôi đã bảo anh ấy, nhưng anh ấy không nghe."
+  },
+  "koto-tote": {
+    "meaning": "vì / do (cách giải thích trang trọng)",
+    "example": "Vì đây là lần đầu tiên của tôi, xin vui lòng tha thứ cho bất kỳ sự xử lý sai nào."
+  },
+  "atte-no-thanks-to": {
+    "meaning": "chỉ có thể thực hiện được nhờ/ được thực hiện bởi",
+    "example": "Đó là một doanh nghiệp chỉ tồn tại nhờ vào khách hàng của chúng tôi."
+  },
+  "ni-terashite": {
+    "meaning": "theo/phù hợp với",
+    "example": "Theo quy định của pháp luật, hành vi này là bất hợp pháp."
+  },
+  "kagiri-da-emotional": {
+    "meaning": "cảm thấy cực kỳ / giới hạn của (một cảm xúc)",
+    "example": "Tôi rất vui được gặp bạn."
+  },
+  "kiwamari-nai": {
+    "meaning": "cực kỳ / ở mức cực đoan",
+    "example": "Thái độ của anh ta vô cùng thô lỗ."
+  },
+  "hodo-no-mono-dewa-nai": {
+    "meaning": "không đáng giá như vậy / không phải là một vấn đề lớn như vậy",
+    "example": "Điều đó không đáng để lo lắng."
+  },
+  "zutomo-even-without": {
+    "example": "Cô nên hiểu mà không cần tôi nói.",
+    "meaning": "ngay cả khi không có / ngay cả khi không có"
+  },
+  "dano-dano": {
+    "example": "'Bận' cái này, 'mệt' cái kia — không có gì ngoài những lời bào chữa.",
+    "meaning": "những thứ như X và Y (phàn nàn / chê bai nhà/phòng cho thuê)"
+  },
+  "to-miru-see-as": {
+    "meaning": "xem như / coi như / đánh giá là",
+    "example": "Cảnh sát coi nguyên nhân của vụ tai nạn là sơ suất."
+  },
+  "you-de-seemingly": {
+    "example": "Anh ấy có vẻ mạnh mẽ, nhưng thực sự dịu dàng.",
+    "meaning": "dường như X, nhưng thực sự / trông X nhưng"
+  },
+  "sae-sureba-if-only": {
+    "meaning": "nếu chỉ / miễn là (điều kiện tối thiểu được đáp ứng)",
+    "example": "Miễn là bạn có tiền, bạn có thể mua bất cứ thứ gì."
+  },
+  "datte-casual-because": {
+    "meaning": "bởi vì / nhưng / tuy nhiên (phòng thủ thông thường)",
+    "example": "Nhưng tôi không muốn.."
+  },
+  "to-itte-without-particular": {
+    "meaning": "không có gì đặc biệt / không có gì đáng chú ý",
+    "example": "Không có vấn đề gì đặc biệt."
+  },
+  "you-nara-if-looks": {
+    "meaning": "nếu nó trông giống / nếu nó xuất hiện",
+    "example": "Nếu trời có vẻ mưa, hãy hủy."
+  },
+  "you-dewa-if-its": {
+    "example": "Nếu bạn lười biếng như vậy, bạn sẽ không vượt qua được.",
+    "meaning": "nếu nó giống như vậy / với tốc độ này"
+  },
+  "zukume-nothing-but": {
+    "meaning": "không có gì ngoài / hoàn toàn / tất cả X",
+    "example": "Cô ấy luôn mặc toàn đồ đen."
+  },
+  "mamire-smeared": {
+    "meaning": "bôi nhọ / phủ (thường lộn xộn hoặc khó chịu)",
+    "example": "Đứa trẻ đang chơi đùa, phủ đầy bùn đất."
+  },
+  "buru-pretend": {
+    "example": "Anh ta giả vờ là một học giả, nhưng thực ra anh ta không biết nhiều.",
+    "meaning": "giả vờ được /phát sóng"
+  },
+  "meku-have-look": {
+    "meaning": "có một cái nhìn / gợi ý / cảm nhận về",
+    "example": "Gần đây, cuối cùng nó cũng bắt đầu cảm thấy như mùa xuân."
+  },
+  "mono-ga-aru": {
+    "example": "Có điều gì đó cảm động về màn trình diễn của anh ấy.",
+    "meaning": "có điều gì đó (về nó) /ấn tượng"
+  },
+  "to-iu-ka": {
+    "example": "Anh ấy tốt bụng, hay đúng hơn là một kiểu người trầm tính.",
+    "meaning": "hay đúng hơn /ý tôi là"
+  },
+  "to-mo-naku": {
+    "meaning": "vô ý / không cố ý",
+    "example": "Tôi đang nhìn ra ngoài cửa sổ mà không thực sự nhìn."
+  },
+  "kara-iu-to": {
+    "meaning": "từ quan điểm của X/ nói từ X",
+    "example": "Từ kết quả, đó là một thành công lớn."
+  },
+  "naku-mo-nai": {
+    "meaning": "không phải là tôi không /không phải là X không",
+    "example": "Không phải là tôi không muốn đi, nhưng tôi không có thời gian."
+  },
+  "ni-kakatte-iru": {
+    "meaning": "phụ thuộc vào / bản lề vào",
+    "example": "Thành công phụ thuộc vào nỗ lực của bạn."
+  },
+  "to-iu-no-wa": {
+    "example": "Tình bạn là thứ bạn không thể mua bằng tiền.",
+    "meaning": "những gì được gọi là/thực tế là / lý do là"
+  },
+  "hate-ni-after": {
+    "meaning": "vào cuối/ sau (quy trình mở rộng)",
+    "example": "Sau nhiều năm nỗ lực, cuối cùng anh cũng thực hiện được ước mơ của mình."
+  },
+  "sobireru-miss-chance": {
+    "meaning": "bỏ lỡ cơ hội / thất bại",
+    "example": "Có một điều tôi đã bỏ lỡ cơ hội để nói."
+  },
+  "yashinai-emphatic": {
+    "meaning": "(nhấn mạnh) hoàn toàn không/ chắc chắn không (bình thường)",
+    "example": "Không đời nào tôi hiểu được điều đó."
+  },
+  "makuru-extensively": {
+    "meaning": "làm X rất nhiều / làm X rộng rãi / tiếp tục làm",
+    "example": "Tôi đã học rất nhiều trước kỳ thi."
+  },
+  "to-iu-koto-wa": {
+    "example": "Anh ấy không đến có nghĩa là anh ấy có lẽ đang bận.",
+    "meaning": "nó có nghĩa là gì/ như vậy (nó theo sau đó)"
+  },
+  "ka-to-iu-to": {
+    "meaning": "về việc liệu / nếu bạn hỏi liệu",
+    "example": "Đối với việc tôi có thích nó hay không — không thực sự."
+  },
+  "mono-to-shite": {
+    "meaning": "như / được coi là/ giả định rằng",
+    "example": "Chúng tôi sẽ xử lý vấn đề này theo thỏa thuận."
+  },
+  "te-mo-ii-kurai": {
+    "meaning": "đủ để /trong phạm vi (bạn có thể)",
+    "example": "Tôi đã đủ xúc động để có thể khóc."
+  },
+  "ato-wa-rest": {
+    "meaning": "phần còn lại là / tất cả những gì còn lại là",
+    "example": "Công tác chuẩn bị đã hoàn tất. Tất cả những gì còn lại là khởi hành."
+  },
+  "dake-nara": {
+    "meaning": "nếu chỉ / nếu chỉ là X",
+    "example": "Nếu chỉ nhìn thôi thì không sao."
+  },
+  "nai-nomi-narazu": {
+    "meaning": "không chỉ không / không chỉ thất bại",
+    "example": "Không những không xin lỗi mà còn tức giận"
+  },
+  "tsutsu-while": {
+    "meaning": "trong khi làm / mặc dù (chính thức)",
+    "example": "Tôi vừa đọc sách vừa nghe nhạc."
+  },
+  "ni-shitagatte": {
+    "meaning": "theo / như (X tiến triển)",
+    "example": "Vui lòng hành động theo quy tắc."
+  },
+  "ni-sotte-along": {
+    "meaning": "cùng / phù hợp với",
+    "example": "Tôi đi dọc theo dòng sông."
+  },
+  "mono-no-although": {
+    "meaning": "mặc dù / tuy rằng (trang trọng)",
+    "example": "Mặc dù tôi đã bắt đầu làm bài tập về nhà, nhưng nó không tiến triển nhiều."
+  },
+  "ka-no-you-ni": {
+    "meaning": "như thể / như thể",
+    "example": "Anh ta nói như thể anh ta không biết gì cả."
+  },
+  "mono-nara-if-possible": {
+    "meaning": "nếu có thể / nếu làm được",
+    "example": "Nếu tôi có thể quay trở lại quá khứ, tôi sẽ làm."
+  },
+  "wo-motoni-based-on": {
+    "example": "Cuốn tiểu thuyết này được viết dựa trên một câu chuyện có thật.",
+    "meaning": "dựa trên / trên cơ sở"
+  },
+  "ue-ni-in-addition": {
+    "example": "Phòng này rộng rãi và cũng sáng sủa.",
+    "meaning": "ngoài/ trên (cái đó)"
+  },
+  "ue-wa-now": {
+    "example": "Bây giờ tôi đã hứa, tôi chắc chắn sẽ giữ lời hứa của mình.",
+    "meaning": "bây giờ là / kể từ (chính thức, ngụ ý cam kết)"
+  },
+  "ijou-since": {
+    "meaning": "kể từ / bây giờ/ miễn là",
+    "example": "Vì tôi đã hứa, tôi phải giữ nó."
+  },
+  "shikamo-moreover": {
+    "meaning": "hơn thế nữa /hơn thế nữa/ trên hết",
+    "example": "Anh ấy thông minh. Hơn nữa, tính cách của anh ấy thật tuyệt vời."
+  },
+  "bakari-no": {
+    "meaning": "không có gì ngoài / chỉ có một cách (để giảm / tăng)",
+    "example": "Giá chỉ tiếp tục tăng."
+  },
+  "osore-ga-aru": {
+    "meaning": "rủi ro / sợ hãi (có thể xảy ra)",
+    "example": "Có nguy cơ mưa lớn vào ngày mai."
+  },
+  "zaru-wo-enai": {
+    "meaning": "không thể giúp đỡ nhưng /không có lựa chọn nào khác ngoài việc",
+    "example": "Tôi không thể không đồng ý với ý kiến của anh ấy."
+  },
+  "ka-to-omou-to": {
+    "meaning": "không sớm hơn had / just when (thay đổi bất ngờ)",
+    "example": "Cô ấy đã khóc ngay khi cô ấy bắt đầu cười."
+  },
+  "hodo-dewa-nai": {
+    "meaning": "không đến mức / không nhiều như",
+    "example": "Nó đau, nhưng không đến mức phải đến bệnh viện."
+  }
+}

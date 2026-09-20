@@ -6,6 +6,7 @@ from n5_grammar import LESSONS as GRAMMAR_LESSONS, PATTERNS as GRAMMAR_PATTERNS,
 from n4_grammar import LESSONS as N4_GRAMMAR_LESSONS, PATTERNS as N4_GRAMMAR_PATTERNS, EXAMPLES as N4_GRAMMAR_EXAMPLES
 from n3_grammar import LESSONS as N3_GRAMMAR_LESSONS, PATTERNS as N3_GRAMMAR_PATTERNS, EXAMPLES as N3_GRAMMAR_EXAMPLES
 from n2_grammar import LESSONS as N2_GRAMMAR_LESSONS, PATTERNS as N2_GRAMMAR_PATTERNS, EXAMPLES as N2_GRAMMAR_EXAMPLES
+from n5_kanjikana_related import RELATED_WORDS as N5_KANJI_RELATED_WORDS, RELATED_KANJI as N5_RELATED_KANJI
 
 DB_PATH = Path(__file__).parent / "kanjiai.db"
 GRAMMAR_SEED_VERSION = "n5-topic-path-v2"
@@ -13,8 +14,13 @@ FULL_N5_GRAMMAR_SEED_VERSION = "n5-full-japanese-language-data-v1"
 N4_GRAMMAR_SEED_VERSION = "n4-topic-path-v1"
 FULL_N4_GRAMMAR_SEED_VERSION = "n4-full-japanese-language-data-vi-v1"
 N3_GRAMMAR_SEED_VERSION = "n3-topic-path-v1"
+FULL_N3_GRAMMAR_SEED_VERSION = "n3-full-japanese-language-data-vi-v1"
 N2_GRAMMAR_SEED_VERSION = "n2-topic-path-v1"
-SEED_KANJI = [("日","ngày, mặt trời","ニチ・ジツ","ひ・か",4,"N5","日"),("人","người","ジン・ニン","ひと",2,"N5","人"),("学","học","ガク","まな.ぶ",8,"N5","子"),("食","ăn, thực phẩm","ショク・ジキ","た.べる",9,"N5","食"),("水","nước","スイ","みず",4,"N5","水"),("本","sách, gốc","ホン","もと",5,"N5","木"),("会","gặp gỡ, hội","カイ・エ","あ.う",6,"N5","人"),("山","núi","サン","やま",3,"N5","山"),("木","cây, gỗ","モク・ボク","き・こ",4,"N5","木"),("書","viết, sách","ショ","か.く",10,"N5","曰")]
+FULL_N2_GRAMMAR_SEED_VERSION = "n2-full-japanese-language-data-vi-v1"
+FULL_N1_GRAMMAR_SEED_VERSION = "n1-full-japanese-language-data-vi-v1"
+N5_KANJI_RELATED_WORDS_VERSION = "kanjikana-n5-common-words-vi-v1"
+N5_RELATED_KANJI_VERSION = "kanjikana-n5-related-kanji-v1"
+SEED_KANJI = [("日","ngày, mặt trời","ニチ・ジツ","ひ・か",4,"N5","日","NHẬT"),("人","người","ジン・ニン","ひと",2,"N5","人","NHÂN"),("学","học","ガク","まな.ぶ",8,"N5","子","HỌC"),("食","ăn, thực phẩm","ショク・ジキ","た.べる",9,"N5","食","THỰC"),("水","nước","スイ","みず",4,"N5","水","THỦY"),("本","sách, gốc","ホン","もと",5,"N5","木","BẢN"),("山","núi","サン","やま",3,"N5","山","SƠN"),("木","cây, gỗ","モク・ボク","き・こ",4,"N5","木","MỘC"),("書","viết, sách","ショ","か.く",10,"N5","曰","THƯ")]
 
 def connect():
     db = sqlite3.connect(DB_PATH); db.row_factory = sqlite3.Row; db.execute("PRAGMA foreign_keys = ON")
@@ -23,7 +29,9 @@ def connect():
 def initialize_database():
     with connect() as db:
         db.executescript("""
-        CREATE TABLE IF NOT EXISTS kanji (char TEXT PRIMARY KEY, meaning TEXT NOT NULL, on_reading TEXT NOT NULL, kun_reading TEXT NOT NULL, strokes INTEGER NOT NULL CHECK(strokes > 0), level TEXT NOT NULL, radical TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS kanji (char TEXT PRIMARY KEY, meaning TEXT NOT NULL, on_reading TEXT NOT NULL, kun_reading TEXT NOT NULL, strokes INTEGER NOT NULL CHECK(strokes > 0), level TEXT NOT NULL, radical TEXT NOT NULL, han_viet TEXT NOT NULL DEFAULT '', order_index INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS kanji_related_words (kanji TEXT NOT NULL REFERENCES kanji(char) ON DELETE CASCADE, word TEXT NOT NULL, reading TEXT NOT NULL, meaning TEXT NOT NULL, order_index INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(kanji, word, reading));
+        CREATE TABLE IF NOT EXISTS kanji_related_characters (kanji TEXT NOT NULL REFERENCES kanji(char) ON DELETE CASCADE, related_char TEXT NOT NULL, meaning TEXT NOT NULL DEFAULT '', order_index INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(kanji, related_char));
         CREATE TABLE IF NOT EXISTS lesson_groups (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, japanese_title TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', order_index INTEGER NOT NULL DEFAULT 0, UNIQUE(level, title));
         CREATE TABLE IF NOT EXISTS lessons (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', order_index INTEGER NOT NULL DEFAULT 0, group_id INTEGER REFERENCES lesson_groups(id) ON DELETE SET NULL);
         CREATE TABLE IF NOT EXISTS vocabulary (id INTEGER PRIMARY KEY AUTOINCREMENT, lesson_id INTEGER REFERENCES lessons(id) ON DELETE SET NULL, word TEXT NOT NULL, reading TEXT NOT NULL, meaning TEXT NOT NULL, level TEXT NOT NULL, example_japanese TEXT NOT NULL DEFAULT '', example_reading TEXT NOT NULL DEFAULT '', example_meaning TEXT NOT NULL DEFAULT '', audio_url TEXT NOT NULL DEFAULT '');
@@ -49,7 +57,34 @@ def initialize_database():
         for column in ("example_japanese", "example_reading", "example_meaning", "audio_url"):
             if column not in vocabulary_columns:
                 db.execute(f"ALTER TABLE vocabulary ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
-        for kanji in SEED_KANJI: db.execute("INSERT OR IGNORE INTO kanji VALUES (?, ?, ?, ?, ?, ?, ?)", kanji)
+        kanji_columns = {column["name"] for column in db.execute("PRAGMA table_info(kanji)")}
+        if "han_viet" not in kanji_columns:
+            db.execute("ALTER TABLE kanji ADD COLUMN han_viet TEXT NOT NULL DEFAULT ''")
+        if "order_index" not in kanji_columns:
+            db.execute("ALTER TABLE kanji ADD COLUMN order_index INTEGER NOT NULL DEFAULT 0")
+        for kanji in SEED_KANJI:
+            db.execute("""INSERT OR IGNORE INTO kanji(char,meaning,on_reading,kun_reading,strokes,level,radical,han_viet)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", kanji)
+            db.execute("UPDATE kanji SET han_viet=? WHERE char=? AND han_viet=''", (kanji[7], kanji[0]))
+        related_seed = db.execute("SELECT value FROM app_settings WHERE key='n5_kanji_related_words_version'").fetchone()
+        n5_kanji_count = db.execute("SELECT COUNT(*) FROM kanji WHERE level='N5'").fetchone()[0]
+        # The full N5 inventory is imported separately.  Do not set this
+        # version on a fresh database until every referenced Kanji exists.
+        if n5_kanji_count >= 80 and (not related_seed or related_seed["value"] != N5_KANJI_RELATED_WORDS_VERSION):
+            db.execute("DELETE FROM kanji_related_words WHERE kanji IN (SELECT char FROM kanji WHERE level='N5')")
+            for kanji, words in N5_KANJI_RELATED_WORDS.items():
+                for order_index, (word, reading, meaning) in enumerate(words, 1):
+                    db.execute("""INSERT INTO kanji_related_words(kanji,word,reading,meaning,order_index)
+                        VALUES (?, ?, ?, ?, ?)""", (kanji, word, reading, meaning, order_index))
+            db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('n5_kanji_related_words_version',?)", (N5_KANJI_RELATED_WORDS_VERSION,))
+        related_kanji_seed = db.execute("SELECT value FROM app_settings WHERE key='n5_related_kanji_version'").fetchone()
+        if n5_kanji_count >= 80 and (not related_kanji_seed or related_kanji_seed["value"] != N5_RELATED_KANJI_VERSION):
+            db.execute("DELETE FROM kanji_related_characters WHERE kanji IN (SELECT char FROM kanji WHERE level='N5')")
+            for kanji, characters in N5_RELATED_KANJI.items():
+                for order_index, related_char in enumerate(characters.split(), 1):
+                    db.execute("""INSERT INTO kanji_related_characters(kanji,related_char,order_index)
+                        VALUES (?, ?, ?)""", (kanji, related_char, order_index))
+            db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('n5_related_kanji_version',?)", (N5_RELATED_KANJI_VERSION,))
         # Grammar is independently versioned so it can evolve even after the
         # vocabulary curriculum has been imported. Deleting an N5 lesson
         # cascades only to its patterns/examples, never to vocabulary or kanji.
@@ -84,7 +119,7 @@ def initialize_database():
                     db.execute("INSERT INTO grammar_examples(pattern_id,japanese,reading,meaning_vi) VALUES (?, ?, ?, ?)", (pattern["id"],japanese,reading,meaning))
             db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('n4_grammar_seed_version',?)", (N4_GRAMMAR_SEED_VERSION,))
         n3_grammar_seed = db.execute("SELECT value FROM app_settings WHERE key='n3_grammar_seed_version'").fetchone()
-        if not n3_grammar_seed or n3_grammar_seed["value"] != N3_GRAMMAR_SEED_VERSION:
+        if not n3_grammar_seed or n3_grammar_seed["value"] not in {N3_GRAMMAR_SEED_VERSION, FULL_N3_GRAMMAR_SEED_VERSION}:
             db.execute("DELETE FROM grammar_lessons WHERE level='N3'")
             for level, title, description, order_index in N3_GRAMMAR_LESSONS:
                 db.execute("INSERT INTO grammar_lessons(level,title,description,order_index) VALUES (?, ?, ?, ?)", (level,title,description,order_index))
@@ -99,7 +134,7 @@ def initialize_database():
                     db.execute("INSERT INTO grammar_examples(pattern_id,japanese,reading,meaning_vi) VALUES (?, ?, ?, ?)", (pattern["id"],japanese,reading,meaning))
             db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('n3_grammar_seed_version',?)", (N3_GRAMMAR_SEED_VERSION,))
         n2_grammar_seed = db.execute("SELECT value FROM app_settings WHERE key='n2_grammar_seed_version'").fetchone()
-        if not n2_grammar_seed or n2_grammar_seed["value"] != N2_GRAMMAR_SEED_VERSION:
+        if not n2_grammar_seed or n2_grammar_seed["value"] not in {N2_GRAMMAR_SEED_VERSION, FULL_N2_GRAMMAR_SEED_VERSION}:
             db.execute("DELETE FROM grammar_lessons WHERE level='N2'")
             for level, title, description, order_index in N2_GRAMMAR_LESSONS:
                 db.execute("INSERT INTO grammar_lessons(level,title,description,order_index) VALUES (?, ?, ?, ?)", (level,title,description,order_index))

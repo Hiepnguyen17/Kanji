@@ -1,9 +1,9 @@
 # Grammar sources and attribution
 
-KanjiAI groups the full Japanese Language Data N5 inventory into a beginner,
-Minna-style sequence of 25 lessons. The source patterns, English descriptions,
-and source examples retain their CC BY-SA 4.0 provenance. N4 and higher lesson
-structure, Vietnamese explanations, and examples are original project content.
+KanjiAI groups the Japanese Language Data N5, N4, N3, N2, and N1 inventories into
+level-appropriate lesson sequences. Source patterns and Japanese example
+sentences retain their CC BY-SA 4.0 provenance. Lesson structure and the
+Vietnamese localization are edited for KanjiAI.
 
 ## Pattern inventory
 

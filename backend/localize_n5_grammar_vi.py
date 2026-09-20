@@ -1,6 +1,7 @@
 """Apply KanjiAI-authored Vietnamese labels to the 77 imported N5 patterns."""
 import argparse
 import json
+import re
 import sqlite3
 from pathlib import Path
 
@@ -29,6 +30,106 @@ MEANINGS = [
     "Đuôi lịch sự của tính từ い.", "Vì/do... nên...",
 ]
 
+FORMULAS = {
+    "desu-polite-copula": "N + です",
+    "da-plain-copula": "N + だ",
+    "deshita-past-polite-copula": "N + でした",
+    "dewa-arimasen-negative-polite-copula": "N + ではありません",
+    "masu-polite-verb": "Gốc Vます + ます",
+    "mashita-polite-past-verb": "Gốc Vます + ました",
+    "masen-polite-negative-verb": "Gốc Vます + ません",
+    "masendeshita-polite-past-negative-verb": "Gốc Vます + ませんでした",
+    "particle-wa-topic": "N + は",
+    "particle-ga-subject": "N + が",
+    "particle-o-object": "N + を",
+    "particle-ni-target": "N / Địa điểm / Thời gian + に",
+    "particle-de-means": "Địa điểm / N (phương tiện) + で",
+    "particle-to-and-with": "N + と + V",
+    "particle-no-possession": "N1 + の + N2",
+    "particle-e-direction": "Địa điểm + へ",
+    "particle-kara-from": "Địa điểm / Thời gian + から",
+    "particle-made-until": "Địa điểm / Thời gian + まで",
+    "particle-mo-also": "N + も",
+    "particle-ka-question": "Câu + か",
+    "particle-ne-seeking-agreement": "Câu + ね",
+    "particle-yo-emphasis": "Câu + よ",
+    "kore-sore-are-demonstratives": "これ / それ / あれ / どれ",
+    "kono-sono-ano-dono-attributive": "この / その / あの / どの + N",
+    "koko-soko-asoko-doko": "ここ / そこ / あそこ / どこ",
+    "arimasu-existence-inanimate": "Địa điểm + に + N + が + あります",
+    "imasu-existence-animate": "Địa điểm + に + N (người/động vật) + が + います",
+    "te-form-basic": "Vて",
+    "te-kudasai-request": "Vて + ください",
+    "te-imasu-progressive": "Vて + います",
+    "nai-form": "Vない",
+    "ta-form": "Vた",
+    "i-adjective-nonpast": "Aい + (です)",
+    "i-adjective-negative": "Aい (bỏ い) + くない / くありません",
+    "i-adjective-past": "Aい (bỏ い) + かった(です)",
+    "na-adjective-nonpast": "Aな + です / だ",
+    "na-adjective-attributive": "Aな + な + N",
+    "na-adjective-negative": "Aな + ではありません / じゃない",
+    "na-adjective-past": "Aな + でした / だった",
+    "mashou-volitional": "Gốc Vます + ましょう",
+    "mashou-ka-invitation": "Gốc Vます + ましょうか",
+    "tai-desire": "Gốc Vます + たい",
+    "ga-hoshii-wanting-thing": "N + が + ほしい(です)",
+    "hou-ga-comparative": "N1 + のほうが + N2 + より + Aい / Aな",
+    "ichiban-superlative": "一番 + Aい / Aな",
+    "counter-tsu": "Số + つ",
+    "counter-people-nin": "Số + 人（にん）",
+    "question-words-basic": "何 / 誰 / どこ / いつ / どう / どうして",
+    "nai-de-kudasai": "Vない + でください",
+    "particle-ya-non-exhaustive": "N1 + や + N2 + (など)",
+    "masenka-invitation": "Gốc Vます + ませんか",
+    "mou-ta-already": "もう + Vた / ました",
+    "mada-not-yet": "まだ + Vていない / まだ + Vている",
+    "toki-ni-when-basic": "V (TTT) / Aい / Aな + な / N + の + とき(に)",
+    "issho-ni-together": "N + と + 一緒に",
+    "dake-only-basic": "N / Số + lượng từ + だけ",
+    "i-adj-adverbial-ku": "Aい (bỏ い) + く (+ V)",
+    "na-adj-adverbial-ni": "Aな + に (+ V)",
+    "i-adj-te-joining-kute": "Aい (bỏ い) + くて",
+    "na-adj-te-joining-de": "Aな / N + で",
+    "mo-mo-both": "N1 + も + N2 + も",
+    "to-exhaustive-listing": "N1 + と + N2",
+    "location-nouns-ue-shita": "N + の + 上 / 下 / 中 / 前 / 後ろ / 横 / 隣 / 間 + (に / で / へ)",
+    "ikutsu-how-many": "いくつ (+ lượng từ phù hợp nếu cần)",
+    "ikura-how-much": "いくら",
+    "nanji-what-time": "何時 (+ 〜分)",
+    "nanyoubi-day-of-week": "何曜日 / 曜日",
+    "counter-ji-oclock": "Số + 時",
+    "counter-fun-minute": "Số + 分",
+    "counter-sai-age": "Số + 歳 / 才",
+    "counter-en-money": "Số + 円",
+    "counter-hon-long": "Số + 本",
+    "counter-mai-flat": "Số + 枚",
+    "mai-every-prefix": "毎 + Thời gian",
+    "jikan-time-duration": "Số + 時間",
+    "i-adj-desu-politeness": "Aい + です",
+    "kara-cause": "TTT / thể lịch sự + から",
+}
+
+
+def vietnamese_formula(formula: str) -> str:
+    """Keep only grammar symbols and Vietnamese labels in learner-facing UI."""
+    replacements = [
+        ("Plain form", "TTT"), ("dictionary form", "thể từ điển"),
+        ("Verb ます-stem", "Vます"), ("Verb stem", "Vます"),
+        ("Verb-て form", "Vて"), ("Verb-た form", "Vた"),
+        ("Verb-ない form", "Vない"), ("Verb", "V"), ("Noun", "N"),
+        ("Sentence", "Câu"), ("Clause", "Mệnh đề"), ("Number", "Số"),
+        ("counter", "trợ số"), ("form", "thể"),
+    ]
+    for source, target in replacements:
+        formula = formula.replace(source, target)
+    formula = formula.replace("Plain", "TTT").replace("plain", "TTT").replace("V plain", "V thể từ điển")
+    formula = formula.replace("i-adjective", "Aい").replace("na-adjective", "Aな")
+    formula = formula.replace("adjective", "tính từ").replace("root", "gốc").replace("stem", "gốc")
+    for source, target in {"noun":"N", "verb":"V", "or":"hoặc", "and":"và", "of":"của", "basic":"cơ bản", "attributive":"bổ nghĩa", "exhaustive":"liệt kê đầy đủ", "non-exhaustive":"liệt kê không đầy đủ", "polite":"lịch sự"}.items():
+        formula = re.sub(rf"\b{source}\b", target, formula, flags=re.I)
+    return formula
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, required=True)
@@ -37,10 +138,23 @@ def main():
     if len(entries) != len(MEANINGS):
         raise ValueError("Source N5 count changed; review the Vietnamese mapping.")
     with sqlite3.connect(DB_PATH) as db:
+        if set(FORMULAS) != {entry["id"] for entry in entries}:
+            raise ValueError("Bảng công thức N5 không khớp inventory nguồn.")
         for entry, meaning in zip(entries, MEANINGS):
-            db.execute("""UPDATE grammar_patterns SET explanation_vi=?, note=?
+            db.execute("""UPDATE grammar_patterns SET formula=?, explanation_vi=?, note=?
                 WHERE id IN (SELECT p.id FROM grammar_patterns p JOIN grammar_lessons l ON l.id=p.lesson_id
-                WHERE l.level='N5' AND p.formula=?)""", (meaning, "Xem cấu trúc và ví dụ để nhận biết cách dùng trong câu.", entry["pattern"]))
+                WHERE l.level='N5' AND p.formula=?)""", (FORMULAS[entry["id"]], meaning, "Xem cấu trúc và ví dụ để nhận biết cách dùng trong câu.", entry["pattern"]))
+        # Some older imported rows already had a partially localized formula
+        # and therefore no longer match the source string above. Normalize
+        # those rows too instead of leaving mixed English labels in the UI.
+        # Patterns are inserted in source order; keeping that stable lets this
+        # migration replace older partially localized formulas deterministically.
+        current_rows = db.execute("""SELECT p.id,p.formula FROM grammar_patterns p
+            JOIN grammar_lessons l ON l.id=p.lesson_id WHERE l.level='N5' ORDER BY p.id""").fetchall()
+        if len(current_rows) != len(entries):
+            raise ValueError("Số mẫu N5 trong cơ sở dữ liệu không khớp nguồn.")
+        for (pattern_id, _), entry in zip(current_rows, entries):
+            db.execute("UPDATE grammar_patterns SET formula=? WHERE id=?", (FORMULAS[entry["id"]], pattern_id))
     print(f"Localized {len(entries)} N5 pattern meanings and notes into Vietnamese.")
 
 if __name__ == "__main__":

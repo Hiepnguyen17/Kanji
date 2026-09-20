@@ -53,4 +53,68 @@ html{scrollbar-gutter:stable}.flashcard.large{flex:0 0 610px!important;height:61
 :root{--content-gutter:clamp(28px,6.3vw,120px)}.grammar-index,.vocabulary-index,.conjugation-page,.grammar-detail{max-width:none!important;margin:0!important;padding-left:var(--content-gutter)!important;padding-right:var(--content-gutter)!important}
 .grammar-index .grammar-guide{padding:18px 22px 16px}.grammar-index .grammar-guide h2{font-size:16px;margin-bottom:10px}.grammar-index .grammar-legend>span{font-size:13px}.grammar-index .grammar-chip{min-height:26px;font-size:11px}.grammar-index .conjugation-guide{min-height:74px;padding:13px 18px;border-radius:10px}.grammar-index .conjugation-guide span{display:grid;gap:3px}.grammar-index .conjugation-guide b{font-size:17px}.grammar-index .conjugation-guide small{font-size:12px}.grammar-index .conjugation-guide em{font-size:14px}@media(max-width:720px){.grammar-index .grammar-guide{padding:16px}.grammar-index .conjugation-guide{min-height:68px;padding:12px 14px}.grammar-index .conjugation-guide b{font-size:15px}.grammar-index .conjugation-guide small{font-size:11px}}
 .grammar-chip.number{background:#f3edff;border-color:#b99af4;color:#7144bb}
+.grammar-chip.sentence{background:#f4ebff;border-color:#c593ff;color:#8744bc}
 .grammar-pattern-index{max-width:none!important}.grammar-pattern-index .grammar-head{margin-bottom:28px!important}.grammar-pattern-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grammar-pattern-list button{position:relative;min-height:124px;padding:20px 58px 18px 24px;border:1px solid #d5dce5;border-radius:11px;background:#fffdf9;color:#14233a;text-align:left;cursor:pointer}.grammar-pattern-list button:hover{border-color:#69a8f4;background:#fff;transform:translateY(-1px)}.grammar-pattern-list button>span{display:block;margin-bottom:8px;font:12px 'DM Mono';color:#4f85c8}.grammar-pattern-list .formula-chips{min-height:29px}.grammar-pattern-list .formula-chips>span{font-size:20px}.grammar-pattern-list .grammar-chip{min-height:32px;font-size:14px}.grammar-pattern-list small{display:block;margin-top:9px;max-width:90%;font-size:14px;color:#657992}.grammar-pattern-list i{position:absolute;right:24px;top:50%;transform:translateY(-50%);font-style:normal;font-size:30px;color:#bdcad9}@media(max-width:780px){.grammar-pattern-list{grid-template-columns:1fr;gap:11px}.grammar-pattern-list button{min-height:108px;padding:17px 48px 16px 19px}.grammar-pattern-list .formula-chips>span{font-size:18px}.grammar-pattern-list small{font-size:13px}}
+
+/* Trang chủ và Học Kanji dùng cùng khoảng lề với trang Từ vựng. */
+.kanji-home,.kanji-learning-page{max-width:none!important;width:100%;margin:0!important;padding-left:var(--content-gutter)!important;padding-right:var(--content-gutter)!important}
+.kanji-home{display:grid;grid-template-columns:minmax(420px,.82fr) minmax(560px,1.18fr);gap:22px;padding-top:30px!important;padding-bottom:66px!important;align-items:start}
+.kanji-home>.hero{grid-column:1/-1;width:100%;min-height:82px;padding:15px 29px;border-radius:14px;display:flex;align-items:center}
+.kanji-home>.hero .home-search-only{width:100%}
+.kanji-home>.hero .eyebrow{margin-bottom:7px}
+.kanji-home>.hero h1{font-size:clamp(26px,2.15vw,33px);line-height:1.04;margin-bottom:5px}
+.kanji-home>.hero .intro{max-width:520px;font-size:11px;line-height:1.4}
+.kanji-home>.hero .search{width:min(520px,70vw);margin-top:0}
+.kanji-home>.hero .search input{padding-top:8px;padding-bottom:8px}
+.kanji-home>.hero .hero-mark{right:43px;bottom:-2px;font-size:105px}
+.kanji-home>.hero .hero-mark small{right:5px;bottom:22px;font-size:9px}
+.kanji-home>.two-col{display:block;min-width:0;margin:0}
+.kanji-home>.two-col>.daily-card{display:none}
+.kanji-home .writing{padding:23px}
+.kanji-home .writing .panel-title h2{font-size:21px}
+.kanji-home .writing .write-grid{grid-template-columns:minmax(245px,310px) minmax(155px,1fr);gap:20px;align-items:center}
+.kanji-home .writing .canvas-wrap{width:100%;max-width:310px}
+.kanji-home>.library{min-width:0;margin:0;padding:23px;background:var(--cream);border:1px solid var(--line);border-radius:16px}
+.kanji-home>.library .levels{grid-template-columns:repeat(5,minmax(72px,1fr));margin:17px 0 15px}
+.kanji-home>.library .levels button{padding:10px 11px}
+.kanji-home>.library .kanji-grid{grid-template-columns:repeat(8,minmax(52px,1fr));gap:8px;max-height:542px;overflow-y:auto;padding:1px 7px 1px 1px;scrollbar-color:#a9cdbc transparent;scrollbar-width:thin}
+.kanji-home>.library .kanji-grid button{min-width:0;aspect-ratio:1;border-color:#b9dfcd;background:#edf9f2}
+.kanji-home>.library .kanji-grid button:hover{border-color:#55ab87;background:#dff4e8;transform:translateY(-1px)}
+.kanji-home>.library .kanji-grid b{font-size:clamp(25px,2vw,34px);color:#16815c}
+.kanji-home>.library .kanji-grid span{font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.kanji-learning-page{padding-top:42px!important;padding-bottom:75px!important}
+.kanji-learning-page .course-grid{grid-template-columns:repeat(3,minmax(220px,1fr))}
+.kanji-learning-page .day-list{max-width:none}
+@media(max-width:1280px){.kanji-home{grid-template-columns:minmax(380px,.85fr) minmax(470px,1.15fr)}.kanji-home .writing .write-grid{grid-template-columns:minmax(230px,280px) minmax(135px,1fr);gap:15px}.kanji-home>.library .kanji-grid{grid-template-columns:repeat(6,minmax(54px,1fr))}}
+@media(max-width:1050px){.kanji-home{grid-template-columns:1fr}.kanji-home>.hero{grid-column:1}.kanji-home>.library .kanji-grid{grid-template-columns:repeat(8,minmax(52px,1fr));max-height:480px}.kanji-home .writing .write-grid{grid-template-columns:minmax(260px,330px) 1fr}.kanji-home .writing .canvas-wrap{max-width:330px}}
+@media(max-width:760px){.kanji-home,.kanji-learning-page{padding-left:20px!important;padding-right:20px!important}.kanji-home{padding-top:22px!important;gap:15px}.kanji-home>.hero{min-height:74px;padding:12px 18px}.kanji-home>.hero .search{width:100%}.kanji-home .writing .write-grid{grid-template-columns:1fr}.kanji-home .writing .canvas-wrap{max-width:320px;margin:auto}.kanji-home>.library .levels{display:flex;overflow-x:auto}.kanji-home>.library .levels button{min-width:88px}.kanji-home>.library .kanji-grid{grid-template-columns:repeat(4,minmax(54px,1fr));max-height:430px}.kanji-learning-page .course-grid{grid-template-columns:1fr}}
+
+/* Chi tiết Kanji: xem nét trước, sau đó tự viết để AI kiểm tra. */
+.detail-hero .stroke-preview{flex:none;width:166px;text-align:center}
+.stroke-order-play{display:block;width:100%;padding:0;border:0;background:transparent;color:inherit;cursor:pointer}
+.stroke-order-play .kanjivg-board{transition:transform .18s,box-shadow .18s}
+.stroke-order-play:hover .kanjivg-board,.stroke-order-play:focus-visible .kanjivg-board{transform:translateY(-2px);box-shadow:0 8px 20px #1c4c3a22}
+.stroke-order-play:focus-visible{outline:2px solid #55ab87;outline-offset:4px;border-radius:17px}
+.stroke-order-play em{display:block;margin-top:7px;font:11px 'DM Sans';font-style:normal;color:#398268}
+.stroke-order-play.playing em{color:#166fd0}
+.stroke-preview .kanjivg-board{height:166px;border:0;border-radius:16px;background:#e2f2df}
+.stroke-preview .kanjivg-board>div{width:100%;height:100%}
+.stroke-preview .kanjivg-board svg{padding:17px}
+.stroke-preview .kanjivg-board svg path{stroke-width:4.2!important}
+.stroke-preview .kanjivg-board.fallback b{font-size:102px}
+.stroke-preview>span{display:block;margin-top:7px;color:#5f9074;font:11px 'DM Mono'}
+.kanji-practice .kanji-practice-grid{display:grid;grid-template-columns:minmax(270px,360px) minmax(180px,1fr);gap:26px;align-items:center;margin-top:18px}
+.kanji-practice .canvas-wrap{max-width:360px;width:100%}
+.kanji-practice .prediction{min-height:250px}
+.kanji-practice .empty-ink{padding:55px 0}
+.related-kanji{margin-top:22px}
+.related-kanji-grid{display:flex;flex-wrap:wrap;gap:11px;margin-top:18px}
+.related-kanji-grid button{position:relative;width:68px;height:68px;padding:0;border:1px solid var(--line);border-radius:12px;background:#fffdf9;color:#163151;cursor:pointer;transition:transform .16s,border-color .16s,background .16s}
+.related-kanji-grid button:hover{transform:translateY(-2px);border-color:#5cab8a;background:#edf9f2}
+.related-kanji-grid b{font:31px 'Zen Kaku Gothic New';line-height:1}
+.related-words .section-heading{margin-bottom:0}
+.related-words .word{padding:18px 0;min-height:74px}
+.related-words .word>strong{font:700 25px 'Zen Kaku Gothic New';line-height:1.2}
+.related-words .word>span{margin-left:16px;font-size:17px;line-height:1.45}
+.related-words .word>button{width:32px;height:32px;font-size:18px}
+@media(max-width:760px){.detail-hero{align-items:flex-start}.detail-hero .stroke-preview{width:118px}.stroke-preview .kanjivg-board{height:118px}.stroke-preview .kanjivg-board svg{padding:12px}.stroke-preview .kanjivg-board.fallback b{font-size:78px}.kanji-practice .kanji-practice-grid{grid-template-columns:1fr;gap:12px}.kanji-practice .canvas-wrap{margin:auto}.kanji-practice .prediction{min-height:130px}.kanji-practice .empty-ink{padding:22px 0}}
