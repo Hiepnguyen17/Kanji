@@ -5,7 +5,10 @@ import { getStroke } from 'perfect-freehand';
 import './styles.css';
 
 // Override in .env.local for a phone, LAN server, or deployed API.
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8010').replace(/\/$/, '');
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+// In Docker, an explicit empty value means the API is served through the same
+// public domain by Nginx. Local Vite development keeps the localhost default.
+const API_BASE_URL = (configuredApiBaseUrl === undefined ? 'http://localhost:8010' : configuredApiBaseUrl).replace(/\/$/, '');
 const apiFetch = (url, options) => {
  const resolved = typeof url === 'string' && url.startsWith('http://localhost:8010')
   ? `${API_BASE_URL}${url.slice('http://localhost:8010'.length)}`

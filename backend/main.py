@@ -18,7 +18,6 @@ from google.auth.transport.requests import Request as GoogleRequest
 from google.oauth2 import id_token
 import numpy as np
 from PIL import Image, ImageDraw
-from database import connect, initialize_database
 
 
 def load_local_environment() -> None:
@@ -35,6 +34,10 @@ def load_local_environment() -> None:
 
 
 load_local_environment()
+
+# Import after the local environment has been read so KANJIAI_DB_PATH can
+# select an ignored local test database before database.py resolves DB_PATH.
+from database import connect, initialize_database
 
 try:
     from recognizer import hanzi_model_status, model_status, recognize, recognize_hanzi_rasterized_png, recognize_rasterized_png, recognize_rasterized_strokes

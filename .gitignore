@@ -1,5 +1,6 @@
 # Local datasets and trained artefacts. ETL data may not be redistributed.
 backend/data/
+backend/kanjiai.test.db*
 backend/models/*.pt
 backend/models/*.json
 
@@ -15,3 +16,7 @@ node_modules/
 
 # Temporary clone used only to run the open grammar-data importer.
 .grammar-data-source/
+
+# Production secrets and generated database backups.
+deploy/.env.production
+backups/

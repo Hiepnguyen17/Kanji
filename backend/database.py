@@ -1,5 +1,6 @@
 """SQLite storage and initial data for KanjiAI."""
 from pathlib import Path
+import os
 import sqlite3
 from n5_curriculum import LESSONS, WORDS, VOCABULARY_EXAMPLES, VOCABULARY_GROUPS, LESSON_GROUPS, STAGING_TOPIC_GROUPS, STAGING_PROMOTIONS, N5_STAGING_WORDS
 from n5_vocabulary_examples import ensure_n5_vocabulary_examples
@@ -10,7 +11,13 @@ from n3_grammar import LESSONS as N3_GRAMMAR_LESSONS, PATTERNS as N3_GRAMMAR_PAT
 from n2_grammar import LESSONS as N2_GRAMMAR_LESSONS, PATTERNS as N2_GRAMMAR_PATTERNS, EXAMPLES as N2_GRAMMAR_EXAMPLES
 from n5_kanjikana_related import RELATED_WORDS as N5_KANJI_RELATED_WORDS, RELATED_KANJI as N5_RELATED_KANJI
 
-DB_PATH = Path(__file__).parent / "kanjiai.db"
+DEFAULT_DB_PATH = Path(__file__).parent / "kanjiai.db"
+# Local development can point to an ignored test database without changing the
+# clean, content-only database distributed with the source code.
+_configured_db_path = os.getenv("KANJIAI_DB_PATH")
+DB_PATH = Path(_configured_db_path).expanduser() if _configured_db_path else DEFAULT_DB_PATH
+if not DB_PATH.is_absolute():
+    DB_PATH = (Path(__file__).parent / DB_PATH).resolve()
 GRAMMAR_SEED_VERSION = "n5-topic-path-v2"
 FULL_N5_GRAMMAR_SEED_VERSION = "n5-full-japanese-language-data-v1"
 N4_GRAMMAR_SEED_VERSION = "n4-topic-path-v1"

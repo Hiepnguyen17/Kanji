@@ -59,6 +59,50 @@ KANJIAI_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://192.168.
 
 Khởi động lại API sau khi đổi cấu hình. Các file `.env` không được đưa lên Git.
 
+## Triển khai Docker qua Cloudflare Tunnel
+
+Bản production chạy React qua Nginx và chuyển các đường dẫn API về FastAPI trong
+cùng một domain. SQLite được lưu trong Docker volume `kanjiai_data`, không nằm
+trong image hay Git repository. Cloudflare Tunnel tạo kết nối **đi ra ngoài** từ
+VPS; vì vậy bản này hoạt động cả với VPS NAT không có cổng public 80/443.
+
+1. Thêm domain vào Cloudflare, thay nameserver ở nhà đăng ký bằng hai nameserver
+   Cloudflare cấp và chờ zone có trạng thái **Active**.
+2. Trong Cloudflare, vào **Networking → Tunnels**, tạo remotely-managed tunnel
+   tên `kanjiai-vps`. Ở phần public hostname, chọn domain `kanjiai.online`, để
+   trống subdomain và đặt **Service URL** là `http://web:80`.
+3. Sao chép `deploy/.env.production.example` thành `deploy/.env.production`,
+   điền domain, Google OAuth, API admin key và tunnel token. Token là bí mật;
+   không đưa lên GitHub hoặc gửi qua chat.
+
+```bash
+cp deploy/.env.production.example deploy/.env.production
+nano deploy/.env.production
+docker compose --env-file deploy/.env.production up -d --build
+docker compose ps
+```
+
+Không cần Caddy, IP public, bản ghi `A` hay mở cổng 80/443. Sau khi deploy,
+Google OAuth callback phải là:
+
+```text
+https://kanjiai.online/auth/google/callback
+```
+
+Thêm chính xác URL này vào **Authorized redirect URIs** trong Google Cloud
+Console. Kiểm tra service tại `https://kanjiai.online/health`.
+
+### Backup SQLite
+
+Chạy lệnh sau trên VPS để tạo snapshot nhất quán khi API đang hoạt động:
+
+```bash
+sh deploy/backup-sqlite.sh
+```
+
+File backup được tạo trong `backups/` và bị Git bỏ qua. Nên chạy lệnh này bằng
+cron mỗi ngày và sao chép backup sang nơi lưu trữ khác. Không sao chép thư mục
+`backend/data/local/` hay `deploy/.env.production` lên GitHub.
 ## Đăng nhập Google và tiến độ học
 
 Ứng dụng dùng Google OAuth theo luồng mở cửa sổ chọn tài khoản, giống màn hình Google trong ảnh tham khảo. Lần đầu đăng nhập sẽ tự tạo tài khoản; cookie phiên chỉ được lưu ở API, còn tiến độ Kanji/từ vựng/ngữ pháp nằm trong SQLite theo từng tài khoản.
@@ -82,7 +126,19 @@ Nếu màn hình báo thiếu phụ thuộc AI, cài lại `backend/requirements
 
 ## Dữ liệu local
 
-SQLite tự tạo tại `backend/kanjiai.db` khi API chạy lần đầu.
+Database mặc định là `backend/kanjiai.db`. Bản này chỉ chứa dữ liệu nội dung
+(Kanji, từ vựng và ngữ pháp), tuyệt đối không chứa tài khoản, phiên đăng nhập,
+tiến độ, danh sách ôn tập hoặc cài đặt cá nhân.
+
+Để dùng dữ liệu kiểm thử cá nhân, đặt một database SQLite ở thư mục đã bị Git
+bỏ qua, ví dụ `backend/data/local/kanjiai.test.db`, rồi thêm vào `backend/.env`:
+
+```text
+KANJIAI_DB_PATH=data/local/kanjiai.test.db
+```
+
+Không đặt biến này trên production nếu muốn dùng database nội dung sạch mặc
+định. Khi chạy với database trống, API sẽ tự khởi tạo schema và dữ liệu seed.
 
 ## Quản trị nội dung an toàn
 

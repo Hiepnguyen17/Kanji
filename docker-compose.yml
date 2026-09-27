@@ -1,0 +1,40 @@
+services:
+  api:
+    build:
+      context: .
+      target: api
+    env_file:
+      - ${KANJIAI_ENV_FILE:-./deploy/.env.production}
+    volumes:
+      - kanjiai_data:/data
+    expose:
+      - "8010"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8010/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+  web:
+    build:
+      context: .
+      target: web
+      args:
+        VITE_API_BASE_URL: ""
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      web:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  kanjiai_data:
