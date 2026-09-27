@@ -1,4 +1,8 @@
-# Runtime dependencies for the locally trained handwriting model.
+# Complete backend for handwriting recognition.
+# The first line keeps the FastAPI/API dependencies in sync.
+-r requirements.txt
+
+# Runtime dependencies for the Japanese and Chinese ONNX handwriting models.
 numpy>=1.26,<3
 Pillow>=10,<12
 torch>=2.0

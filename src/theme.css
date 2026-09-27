@@ -1,0 +1,31 @@
+/* Theme rules deliberately scoped to the application to override legacy colours. */
+.app { --font-ui:'Segoe UI',Arial,'Yu Gothic',Meiryo,sans-serif; font-family:var(--font-ui); color:var(--ink); }
+.app :is(button,input,select,textarea,h1,h2,h3,p,small,span,b,strong,em,a,label,dt,dd,code,i,div) { font-family:var(--font-ui)!important; }
+.app :is(h1,h2,h3,.brand b) { letter-spacing:normal!important; }
+.app.dark { color-scheme:dark; --ink:#edf3f8!important; --muted:#b4c3ce!important; --paper:#14201f!important; --cream:#20302e!important; --line:#415653!important; --mint:#2b4940!important; --deep:#185b49!important; color:var(--ink); background:var(--paper); }
+.app.dark main { color:var(--ink); background:var(--paper); }
+.app.dark aside { background:var(--cream)!important; color:var(--ink); }
+.app.dark aside button { color:var(--muted); }
+.app.dark aside button.active,.app.dark aside button:hover { background:#324c46!important; color:#f1f8f5!important; }
+.app.dark :is(.theme,.brand b,.setting b,.settings h1) { color:var(--ink); }
+.app.dark :is(.eyebrow,.back,.link-button,.grammar-back,.stroke-order-play em,.stroke-preview>span) { color:#8edcba; }
+.app.dark :is(.intro,.hint,.source-note,.memory,.crumb,.setting small,.facts span,.word span,.readings dt,.radical) { color:var(--muted); }
+.app.dark :is(.home,.simple-page,.grammar-detail,.vocabulary-index) { background-image:none; }
+.app.dark :is(.group-toggle,.vocab-children,.vocab-children>button,.vocab-list,.vocab-list>button,.vocab-progress,.lesson-browser button,.grammar-pattern-list button,.grammar-guide,.conjugation-panel,.conjugation-row,.flashcard-outline,.flashcard-examples,.levels button,.kanji-grid button,.related-kanji-grid button,.course,.search,.help-panel,.help-panel form,.help-panel input) { background:var(--cream)!important; color:var(--ink); border-color:var(--line); }
+.app.dark :is(.group-toggle:hover,.vocab-children>button:hover,.lesson-browser button:hover,.grammar-pattern-list button:hover,.kanji-grid button:hover,.related-kanji-grid button:hover,.levels button.selected,.conjugation-row.heading,.flashcard-examples>div) { background:#2b433d!important; color:var(--ink); }
+.app.dark :is(.group-japanese,.group-toggle strong,.vocab-children strong,.lesson-browser button>b,.grammar-progress,.grammar-head h1,.example-word b,.example-sentence b,.conjugation-row>*,.formula-chips>span,.formula-chips>i) { color:var(--ink)!important; }
+.app.dark :is(.group-toggle small,.vocab-children span,.lesson-browser button>small,.lesson-browser button>em,.grammar-pattern-list small,.grammar-head small,.grammar-legend>span,.conjugation-panel>p,.example-word span,.example-word em,.example-sentence span,.vocabulary-index>p) { color:var(--muted)!important; }
+.app.dark :is(.vocab-level-tabs button,.outline-topic-toggle,.outline-lessons button,.review-tabs button,.lesson-tabs button,.help-actions button,.help-topics button) { background:#243b37; color:#c3e4ff; border-color:#577c8f; }
+.app.dark :is(.vocab-level-tabs button.active,.outline-lessons button.current,.outline-topic-toggle.active-topic) { background:#234967; color:#e6f3ff; border-color:#82baff; }
+.app.dark :is(.conjugation-guide,.conjugation-guide:hover) { background:#3a3220!important; border-color:#a68c47; }
+.app.dark .conjugation-guide :is(b,small,em) { color:#ffe09b; }
+.app.dark :is(.conjugation-table,.conjugation-row>*,.conjugation-row:not(.heading),.flashcard-examples article,.example-word) { border-color:var(--line); }
+.app.dark .kanji-home>.library .kanji-grid b { color:#92e7c1; }
+.app.dark .primary { background:#24634e; color:#fff; }
+.app.dark .course.locked { opacity:1; }
+.app.dark .course :is(p,small,button) { color:#b8dfcb; }
+.app.dark .help-messages { background:#172724; }
+.app.dark .help-message { background:#2c423c; color:#edf3f8; }
+.app.dark .help-message.user { background:#145e91; color:#fff; }
+.app.dark input::placeholder { color:#b4c3ce; opacity:1; }
+.app.dark :is(.canvas-stage,.stroke-preview .kanjivg-board,.flash-writing canvas) { color-scheme:light; color:#1e292b; }

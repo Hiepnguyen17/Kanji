@@ -2,6 +2,8 @@
 from pathlib import Path
 import sqlite3
 from n5_curriculum import LESSONS, WORDS, VOCABULARY_EXAMPLES, VOCABULARY_GROUPS, LESSON_GROUPS, STAGING_TOPIC_GROUPS, STAGING_PROMOTIONS, N5_STAGING_WORDS
+from n5_vocabulary_examples import ensure_n5_vocabulary_examples
+from grammar_quality import ensure_grammar_quality
 from n5_grammar import LESSONS as GRAMMAR_LESSONS, PATTERNS as GRAMMAR_PATTERNS, EXAMPLES as GRAMMAR_EXAMPLES
 from n4_grammar import LESSONS as N4_GRAMMAR_LESSONS, PATTERNS as N4_GRAMMAR_PATTERNS, EXAMPLES as N4_GRAMMAR_EXAMPLES
 from n3_grammar import LESSONS as N3_GRAMMAR_LESSONS, PATTERNS as N3_GRAMMAR_PATTERNS, EXAMPLES as N3_GRAMMAR_EXAMPLES
@@ -37,6 +39,49 @@ def initialize_database():
         CREATE TABLE IF NOT EXISTS vocabulary (id INTEGER PRIMARY KEY AUTOINCREMENT, lesson_id INTEGER REFERENCES lessons(id) ON DELETE SET NULL, word TEXT NOT NULL, reading TEXT NOT NULL, meaning TEXT NOT NULL, level TEXT NOT NULL, example_japanese TEXT NOT NULL DEFAULT '', example_reading TEXT NOT NULL DEFAULT '', example_meaning TEXT NOT NULL DEFAULT '', audio_url TEXT NOT NULL DEFAULT '');
         CREATE TABLE IF NOT EXISTS vocabulary_staging (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, suggested_topic TEXT NOT NULL, word TEXT NOT NULL, reading TEXT NOT NULL, meaning TEXT NOT NULL, source_note TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'review' CHECK(status IN ('review','approved','rejected')), UNIQUE(level, word, reading));
         CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            google_sub TEXT UNIQUE,
+            email TEXT UNIQUE,
+            display_name TEXT NOT NULL DEFAULT '',
+            avatar_url TEXT NOT NULL DEFAULT '',
+            created_at INTEGER NOT NULL,
+            last_login_at INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS user_sessions (
+            token_hash TEXT PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            expires_at INTEGER NOT NULL,
+            created_at INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS oauth_login_states (
+            state TEXT PRIMARY KEY,
+            expires_at INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS user_progress (
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            content_type TEXT NOT NULL CHECK(content_type IN ('kanji','vocabulary','grammar')),
+            content_id TEXT NOT NULL,
+            progress_state TEXT NOT NULL DEFAULT 'started' CHECK(progress_state IN ('started','completed')),
+            score REAL,
+            resume_position INTEGER NOT NULL DEFAULT 0,
+            updated_at INTEGER NOT NULL,
+            PRIMARY KEY(user_id, content_type, content_id)
+        );
+        CREATE TABLE IF NOT EXISTS user_review_items (
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            content_type TEXT NOT NULL CHECK(content_type IN ('kanji','vocabulary','grammar')),
+            content_id TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            PRIMARY KEY(user_id, content_type, content_id)
+        );
+        CREATE TABLE IF NOT EXISTS user_settings (
+            user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+            dark_mode INTEGER NOT NULL DEFAULT 0 CHECK(dark_mode IN (0, 1)),
+            sound_effects INTEGER NOT NULL DEFAULT 1 CHECK(sound_effects IN (0, 1)),
+            kanji_font TEXT NOT NULL DEFAULT 'Noto Serif JP' CHECK(kanji_font IN ('Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho')),
+            updated_at INTEGER NOT NULL
+        );
         CREATE TABLE IF NOT EXISTS grammar_lessons (id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL, order_index INTEGER NOT NULL, UNIQUE(level, title));
         CREATE TABLE IF NOT EXISTS grammar_patterns (id INTEGER PRIMARY KEY AUTOINCREMENT, lesson_id INTEGER NOT NULL REFERENCES grammar_lessons(id) ON DELETE CASCADE, formula TEXT NOT NULL, explanation_vi TEXT NOT NULL, note TEXT NOT NULL, UNIQUE(lesson_id, formula));
         CREATE TABLE IF NOT EXISTS grammar_examples (id INTEGER PRIMARY KEY AUTOINCREMENT, pattern_id INTEGER NOT NULL REFERENCES grammar_patterns(id) ON DELETE CASCADE, japanese TEXT NOT NULL, reading TEXT NOT NULL, meaning_vi TEXT NOT NULL, UNIQUE(pattern_id, japanese));
@@ -62,6 +107,9 @@ def initialize_database():
             db.execute("ALTER TABLE kanji ADD COLUMN han_viet TEXT NOT NULL DEFAULT ''")
         if "order_index" not in kanji_columns:
             db.execute("ALTER TABLE kanji ADD COLUMN order_index INTEGER NOT NULL DEFAULT 0")
+        progress_columns = {column["name"] for column in db.execute("PRAGMA table_info(user_progress)")}
+        if "resume_position" not in progress_columns:
+            db.execute("ALTER TABLE user_progress ADD COLUMN resume_position INTEGER NOT NULL DEFAULT 0")
         for kanji in SEED_KANJI:
             db.execute("""INSERT OR IGNORE INTO kanji(char,meaning,on_reading,kun_reading,strokes,level,radical,han_viet)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", kanji)
@@ -148,6 +196,11 @@ def initialize_database():
                 if pattern:
                     db.execute("INSERT INTO grammar_examples(pattern_id,japanese,reading,meaning_vi) VALUES (?, ?, ?, ?)", (pattern["id"],japanese,reading,meaning))
             db.execute("INSERT OR REPLACE INTO app_settings(key,value) VALUES ('n2_grammar_seed_version',?)", (N2_GRAMMAR_SEED_VERSION,))
+        ensure_grammar_quality(db)
+        # Examples are completed even for the imported N5 curriculum.  This is
+        # deliberately before the early return below, because that curriculum
+        # is already the vocabulary visible in the application.
+        ensure_n5_vocabulary_examples(db)
         # An imported N5 curriculum replaces the starter seed permanently.
         if db.execute("SELECT 1 FROM app_settings WHERE key='n5_curriculum_imported' AND value='1'").fetchone():
             return

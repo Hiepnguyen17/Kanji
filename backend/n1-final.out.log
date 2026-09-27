@@ -1,0 +1,26 @@
+[1/4] Lấy danh sách N1...
+      1136 Kanji, unique=1136
+[2/4] Lấy metadata KANJIDIC-derived/Hán-Việt...
+[3/4] Cache trang nghĩa/từ vựng...
+      Dùng lại cache chi tiết đã có.
+[4/4] Kiểm tra và dựng JSON...
+      Đã kiểm tra 100/1136 Kanji.
+      Đã kiểm tra 200/1136 Kanji.
+      Đã kiểm tra 300/1136 Kanji.
+      Đã kiểm tra 400/1136 Kanji.
+      Đã kiểm tra 500/1136 Kanji.
+      Đã kiểm tra 600/1136 Kanji.
+      Đã kiểm tra 700/1136 Kanji.
+      Đã kiểm tra 800/1136 Kanji.
+      Đã kiểm tra 900/1136 Kanji.
+      Đã kiểm tra 1000/1136 Kanji.
+      Đã kiểm tra 1100/1136 Kanji.
+      Đã kiểm tra 1136/1136 Kanji.
+
+=== Build report ===
+Kanji hoàn chỉnh : 1136/1136
+Unique           : 1136
+Từ vựng         : 5542
+Phủ từ vựng     : {'0': 48, '1': 125, '2': 137, '3': 124, '4': 99, '5': 81, '6': 80, '7': 46, '8': 396}
+Chưa xác minh    : 0
+Output           : kanji_n1_full.json

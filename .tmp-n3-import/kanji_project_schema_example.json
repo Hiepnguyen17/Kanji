@@ -1,0 +1,49 @@
+{
+  "id": "n3-001",
+  "kanji": "人",
+  "meaning": "người",
+  "jlpt": "N5",
+  "order": 1,
+  "strokeCount": 2,
+  "onReadings": [
+    "ジン",
+    "ニン"
+  ],
+  "kunReadings": [
+    "ひと",
+    "-り",
+    "-と"
+  ],
+  "radicals": [
+    "人"
+  ],
+  "themeTags": [
+    "Con người & Xã hội"
+  ],
+  "kanken": "10",
+  "mnemonic": null,
+  "strokeImage": {
+    "fileName": "04eba.svg",
+    "relativePath": "assets/kanji/strokes/04eba.svg",
+    "downloaded": true
+  },
+  "commonWords": [
+    {
+      "word": "大人",
+      "reading": "おとな",
+      "meaning": "người lớn"
+    },
+    {
+      "word": "一人",
+      "reading": "ひとり",
+      "meaning": "một mình"
+    }
+  ],
+  "relatedKanji": [
+    "者",
+    "誰",
+    "男",
+    "自",
+    "物"
+  ]
+}

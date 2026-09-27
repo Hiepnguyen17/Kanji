@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "D:\B\KanjiAI\backend\build_kanji_n1_full.py", line 456, in <module>
+    raise SystemExit(main())
+  File "D:\B\KanjiAI\backend\build_kanji_n1_full.py", line 332, in main
+    seed = fetch_n1_seed(session, cache_dir)
+  File "D:\B\KanjiAI\backend\build_kanji_n1_full.py", line 176, in fetch_n1_seed
+    raise RuntimeError(
+RuntimeError: Seed N1 phải đúng 1136 ký tự, scrape được 1135.
