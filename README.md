@@ -2,8 +2,7 @@
 
 Ứng dụng học Kanji gồm giao diện React/Vite và API FastAPI. Canvas viết tay gửi ảnh/nét vẽ đến **model thật** chạy cục bộ:
 
-- Nhật: DaKanji v2 ONNX (Dariyooo / DaAppLab, MIT), có phương án dự phòng là CNN N5 tự huấn luyện nếu có checkpoint.
-- Trung: model Hanzi ONNX do KanjiAI huấn luyện từ CASIA-HWDB.
+- Có 2 model cho tiếng nhật và trung.
 
 Nhận diện dành cho **một chữ** mỗi lần; đây không phải công cụ chấm đúng/sai thứ tự nét.
 
@@ -15,11 +14,6 @@ Nhận diện dành cho **một chữ** mỗi lần; đây không phải công c
 
 Các model ONNX Nhật/Trung được lưu trong `backend/models/`. Nếu thiếu file model, API vẫn khởi động nhưng endpoint nhận diện sẽ trả trạng thái thiếu model/phụ thuộc thay vì giả lập kết quả.
 
-## Chạy ở máy local
-
-Mở hai terminal tại thư mục dự án `D:\B\KanjiAI`.
-
-### 1. API và model nhận diện
 
 ```powershell
 python -m venv .venv
@@ -28,7 +22,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m uvicorn main:app --app-dir backend --host localhost --port 8010 --reload
 ```
 
-Hoặc chạy `start-backend.bat` sau khi đã cài phụ thuộc.
+Hoặc chạy `start-backend.bat` sau khi đã cài phụ thuộc
 
 Kiểm tra API tại:
 
@@ -243,11 +237,3 @@ Ví dụ kiểm tra mục thiếu bằng PowerShell:
 ```powershell
 Invoke-RestMethod http://localhost:8010/admin/content-audit -Headers @{ 'X-Admin-Key' = $env:KANJIAI_ADMIN_API_KEY }
 ```
-
-## Nguồn dữ liệu và ghi nhận
-
-- Từ vựng/định nghĩa tham khảo [JMdict/EDICT của EDRDG](https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project), CC BY-SA 4.0.
-- SVG thứ tự nét: KanjiVG.
-- Nhận diện Nhật: DaKanji v2, Dariyooo / DaAppLab, MIT.
-- Dữ liệu huấn luyện Trung: CASIA-HWDB; chỉ model đã huấn luyện được dùng khi giấy phép dữ liệu không cho phân phối dataset.
-- Một phần danh sách/từ liên quan JLPT đã được tham khảo từ Kanjikana; xem [KANJI_SOURCES.md](KANJI_SOURCES.md) để biết phạm vi và phần quyền tái sử dụng còn cần xác minh trước khi tái phân phối dataset.
