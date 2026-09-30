@@ -5,6 +5,7 @@ import json
 from math import pow
 import os
 from pathlib import Path
+import re
 import secrets
 import time
 from typing import Literal
@@ -109,6 +110,9 @@ class ProgressUpdate(BaseModel):
     progress_state: Literal["started", "completed"] = "started"
     score: float | None = Field(default=None, ge=0, le=1)
     resume_position: int = Field(default=0, ge=0, le=100000)
+
+class ReviewResultUpdate(BaseModel):
+    remembered: bool
 
 class UserSettingsUpdate(BaseModel):
     dark_mode: bool | None = None
@@ -434,7 +438,29 @@ def get_progress(kanjiai_session: str | None = Cookie(default=None)):
     user = require_user(kanjiai_session)
     with connect() as db:
         rows = db.execute("SELECT content_type,content_id,progress_state,score,resume_position,updated_at FROM user_progress WHERE user_id=? ORDER BY updated_at DESC", (user["id"],)).fetchall()
-    return [dict(item) for item in rows]
+        items = []
+        for saved in rows:
+            item = dict(saved)
+            content_id = item["content_id"]
+            if item["content_type"] == "kanji":
+                match = re.fullmatch(r"kanji-path:(N[1-5]):day-(\d+)", content_id)
+                if match:
+                    level, day = match.groups()
+                    item.update(href=f"/learn/kanji?level={level}&day={int(day)}", label=f"Kanji {level} · Ngày {int(day)}")
+            elif item["content_type"] == "vocabulary" and content_id.startswith("lesson-") and content_id[7:].isdigit():
+                lesson = db.execute("SELECT level,title FROM lessons WHERE id=?", (content_id[7:],)).fetchone()
+                if lesson:
+                    item.update(href=f"/vocabulary/{lesson['level'].lower()}/lesson/{content_id[7:]}/flashcard",
+                        label=f"Từ vựng {lesson['level']} · {lesson['title']}")
+            elif item["content_type"] == "grammar" and content_id.startswith("lesson-") and content_id[7:].isdigit():
+                lesson = db.execute("SELECT level,title FROM grammar_lessons WHERE id=?", (content_id[7:],)).fetchone()
+                if lesson:
+                    target = f"/grammar/{lesson['level'].lower()}/lesson/{content_id[7:]}"
+                    if item["resume_position"] > 0 and db.execute("SELECT 1 FROM grammar_patterns WHERE id=? AND lesson_id=?", (item["resume_position"], content_id[7:])).fetchone():
+                        target += f"/pattern/{item['resume_position']}"
+                    item.update(href=target, label=f"Ngữ pháp {lesson['level']} · {lesson['title']}")
+            items.append(item)
+    return items
 
 
 @app.put("/progress/{content_type}/{content_id}")
@@ -456,24 +482,34 @@ def get_review_items(kanjiai_session: str | None = Cookie(default=None)):
     """Items explicitly saved by a learner for later review, separate from course progress."""
     user = require_user(kanjiai_session)
     with connect() as db:
-        rows = db.execute("SELECT content_type,content_id,created_at FROM user_review_items WHERE user_id=? ORDER BY created_at DESC", (user["id"],)).fetchall()
+        rows = db.execute("""SELECT content_type,content_id,created_at,last_result,reviewed_at,review_count
+            FROM user_review_items WHERE user_id=?
+            ORDER BY CASE last_result WHEN 'forgot' THEN 0 WHEN 'new' THEN 1 ELSE 2 END,
+                COALESCE(reviewed_at,0), created_at DESC""", (user["id"],)).fetchall()
         items = []
         for item in rows:
             record = dict(item)
             if item["content_type"] == "kanji":
-                source = db.execute("SELECT char,meaning,han_viet,level FROM kanji WHERE char=?", (item["content_id"],)).fetchone()
+                source = db.execute("SELECT char,meaning,han_viet,level,on_reading,kun_reading FROM kanji WHERE char=?", (item["content_id"],)).fetchone()
                 if source:
-                    record.update(title=source["char"], subtitle=f"{source['han_viet']} · {source['meaning']}", href=f"/kanji/{source['char']}")
+                    record.update(title=source["char"], subtitle=f"{source['han_viet']} · {source['meaning']}", href=f"/kanji/{source['char']}",
+                        quiz_prompt=source["char"], quiz_answer=f"{source['han_viet']} · {source['meaning']}",
+                        quiz_example=" · ".join(value for value in (source["on_reading"], source["kun_reading"]) if value))
             elif item["content_type"] == "vocabulary" and item["content_id"].startswith("word-"):
-                source = db.execute("""SELECT v.id,v.word,v.reading,v.meaning,v.level,v.lesson_id
+                source = db.execute("""SELECT v.id,v.word,v.reading,v.meaning,v.level,v.lesson_id,v.example_japanese,v.example_meaning
                     FROM vocabulary v WHERE v.id=?""", (item["content_id"][5:],)).fetchone()
                 if source:
-                    record.update(title=source["word"], subtitle=f"{source['reading']} · {source['meaning']}", href=f"/vocabulary/{source['level'].lower()}/lesson/{source['lesson_id']}/flashcard")
+                    record.update(title=source["word"], subtitle=f"{source['reading']} · {source['meaning']}", href=f"/vocabulary/{source['level'].lower()}/lesson/{source['lesson_id']}/flashcard",
+                        quiz_prompt=source["word"], quiz_answer=f"{source['reading']} · {source['meaning']}",
+                        quiz_example=" — ".join(value for value in (source["example_japanese"], source["example_meaning"]) if value))
             elif item["content_type"] == "grammar" and item["content_id"].startswith("pattern-"):
                 source = db.execute("""SELECT p.id,p.formula,p.explanation_vi,l.id AS lesson_id,l.level
                     FROM grammar_patterns p JOIN grammar_lessons l ON l.id=p.lesson_id WHERE p.id=?""", (item["content_id"][8:],)).fetchone()
                 if source:
-                    record.update(title=source["formula"], subtitle=source["explanation_vi"], href=f"/grammar/{source['level'].lower()}/lesson/{source['lesson_id']}/pattern/{source['id']}")
+                    example = db.execute("SELECT japanese,meaning_vi FROM grammar_examples WHERE pattern_id=? ORDER BY id LIMIT 1", (source["id"],)).fetchone()
+                    record.update(title=source["formula"], subtitle=source["explanation_vi"], href=f"/grammar/{source['level'].lower()}/lesson/{source['lesson_id']}/pattern/{source['id']}",
+                        quiz_prompt=source["explanation_vi"] or "Cấu trúc ngữ pháp nào phù hợp?", quiz_answer=source["formula"],
+                        quiz_example=f"{example['japanese']} — {example['meaning_vi']}" if example else "")
             if "href" in record:
                 items.append(record)
     return items
@@ -496,19 +532,37 @@ def remove_review_item(content_type: Literal["kanji", "vocabulary", "grammar"], 
         db.execute("DELETE FROM user_review_items WHERE user_id=? AND content_type=? AND content_id=?", (user["id"], content_type, content_id.strip()))
     return {"ok": True}
 
-@app.get("/kanji")
+@app.put("/review-items/{content_type}/{content_id}/result")
+def record_review_result(content_type: Literal["kanji", "vocabulary", "grammar"], content_id: str,
+                         result: ReviewResultUpdate, kanjiai_session: str | None = Cookie(default=None)):
+    user = require_user(kanjiai_session)
+    if not content_id.strip() or len(content_id) > 200:
+        raise HTTPException(422, "Mã nội dung không hợp lệ")
+    outcome = "remembered" if result.remembered else "forgot"
+    now = int(time.time())
+    with connect() as db:
+        updated = db.execute("""UPDATE user_review_items SET last_result=?,reviewed_at=?,review_count=review_count+1
+            WHERE user_id=? AND content_type=? AND content_id=?""",
+            (outcome, now, user["id"], content_type, content_id.strip()))
+        if updated.rowcount != 1:
+            raise HTTPException(404, "Mục ôn tập không còn trong danh sách")
+        row = db.execute("""SELECT last_result,reviewed_at,review_count FROM user_review_items
+            WHERE user_id=? AND content_type=? AND content_id=?""", (user["id"], content_type, content_id.strip())).fetchone()
+    return {"ok": True, **dict(row)}
+
+@app.get("/api/kanji")
 def list_kanji(level: str | None = None):
     query, values = "SELECT * FROM kanji", []
     if level: query += " WHERE level = ?"; values.append(level.upper())
     with connect() as db: return [row(x) for x in db.execute(query + " ORDER BY CASE WHEN order_index=0 THEN 1 ELSE 0 END, order_index, char", values).fetchall()]
 
-@app.get("/kanji/{char}")
+@app.get("/api/kanji/{char}")
 def kanji_detail(char: str):
     with connect() as db: item = db.execute("SELECT * FROM kanji WHERE char = ?", (char,)).fetchone()
     if not item: raise HTTPException(404, "Không tìm thấy Kanji")
     return row(item)
 
-@app.get("/kanji/{char}/related-words")
+@app.get("/api/kanji/{char}/related-words")
 def related_words(char: str):
     with connect() as db:
         curated = db.execute("""SELECT word, reading, meaning, order_index
@@ -518,7 +572,7 @@ def related_words(char: str):
         # Keep lookup useful for characters that do not yet have curated data.
         return [row(item) for item in db.execute("SELECT word, reading, meaning FROM vocabulary WHERE word LIKE ? ORDER BY id LIMIT 8", (f"%{char}%",)).fetchall()]
 
-@app.get("/kanji/{char}/related-kanji")
+@app.get("/api/kanji/{char}/related-kanji")
 def related_kanji(char: str):
     with connect() as db:
         return [row(item) for item in db.execute("""SELECT related_char, meaning, order_index
@@ -791,7 +845,7 @@ def handwriting_status():
     return {**model_status(), "samples": samples, "sample_labels": labels, "next_step": "Huấn luyện mô hình khi đã có đủ mẫu viết cho từng chữ."}
 
 @app.post("/api/handwriting/samples", status_code=status.HTTP_201_CREATED)
-def save_handwriting_sample(request: HandwritingSampleCreate):
+def save_handwriting_sample(request: HandwritingSampleCreate, _: None = Depends(require_admin)):
     raw = canvas_png(request.image)
     digest = sha256(raw).hexdigest()
     SAMPLES_DIR.mkdir(parents=True, exist_ok=True)

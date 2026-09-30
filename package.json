@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:frontend": "node --test tests/frontend/*.test.mjs",
+    "test:backend": ".\\.venv\\Scripts\\python.exe -m unittest discover -s backend/tests -v",
+    "test": "npm run test:frontend && npm run test:backend"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

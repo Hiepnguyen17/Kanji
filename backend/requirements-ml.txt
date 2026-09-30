@@ -3,7 +3,9 @@
 -r requirements.txt
 
 # Runtime dependencies for the Japanese and Chinese ONNX handwriting models.
-numpy>=1.26,<3
+# NumPy 2.3+ Linux wheels require x86-64-v2. Keep a baseline-compatible
+# release so inference also runs on older virtual CPUs used by budget VPSs.
+numpy==1.26.4
 Pillow>=10,<12
 torch>=2.0
 onnxruntime>=1.18

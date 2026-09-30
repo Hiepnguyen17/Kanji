@@ -1,0 +1,89 @@
+.worksheet-page { padding:32px; max-width:1600px; margin:auto; }
+.worksheet-entry { padding:16px 32px 0; }
+.app .ws-dialog { width:min(1320px,calc(100vw - 32px)); height:calc(100dvh - 40px); max-height:calc(100dvh - 40px); max-width:none; padding:0; border:1px solid var(--line); border-radius:18px; background:var(--paper); color:var(--ink); margin:auto; overflow:auto; overscroll-behavior:contain; box-shadow:0 20px 80px #0005; }
+.ws-dialog::backdrop { background:rgb(0 0 0 / .55); }
+.ws-dialog-header { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; position:sticky; top:0; z-index:4; padding:18px 24px; background:var(--paper); border-bottom:1px solid var(--line); }
+.ws-dialog-header h2 { font-size:24px; margin:4px 0; }
+.ws-dialog-header p { font-size:14px; margin:0; color:var(--muted); }
+.ws-dialog-close { flex-shrink:0; }
+.ws-compact .ws-workspace { margin-top:0; }
+.ws-context-title { font-weight:600; overflow-wrap:anywhere; }
+.ws-customize { display:block; margin-top:18px; padding:8px 0; background:none; border:0; text-align:left; color:var(--ink); text-decoration:underline; }
+.ws-dialog :focus-visible { outline:2px solid #2684ef; outline-offset:3px; }
+@media(max-width:600px) { .app .ws-dialog { width:100%; height:100dvh; max-height:100dvh; border-radius:0; } .ws-dialog-header { padding:12px; gap:8px; } .ws-dialog-header h2 { font-size:20px; } .ws-dialog-header p:not(.eyebrow) { display:none; } }
+.ws-toolbar h1 { font-size:34px; margin:8px 0; }
+.ws-toolbar p { color:var(--muted); }
+.ws-workspace { display:grid; grid-template-columns:310px minmax(0,1fr); gap:24px; margin-top:24px; align-items:start; }
+.ws-controls { border:1px solid var(--line); border-radius:16px; padding:20px; background:var(--cream); }
+.ws-controls h2 { font-size:18px; margin:8px 0 16px; }
+.ws-controls h2:not(:first-child) { margin-top:24px; }
+.ws-controls label { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; font-size:14px; }
+.ws-controls :is(select,input[type=number]) { width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--paper); color:var(--ink); min-width:0; }
+.ws-day-inputs { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.ws-controls input[type=checkbox] { width:17px; height:17px; flex-shrink:0; accent-color:#187750; }
+.ws-controls .ws-checkbox { flex-direction:row; align-items:center; }
+.ws-selection-head { display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:13px; }
+.ws-selection-head button { border:0; background:none; color:var(--ink); text-decoration:underline; padding:4px; }
+.ws-items { max-height:270px; overflow:auto; margin:12px 0; border-block:1px solid var(--line); }
+.ws-items label { flex-direction:row; padding:10px 0; margin:0; align-items:center; border-bottom:1px solid var(--line); }
+.ws-items small { display:block; color:var(--muted); }
+.ws-print-actions { display:grid; gap:12px; margin-top:24px; }
+.ws-print-actions small { line-height:1.6; color:var(--muted); }
+.ws-preview { min-width:0; }
+.ws-preview-label { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.ws-preview-label h2 { font-size:18px; }
+.ws-preview-label span { font-size:13px; color:var(--muted); }
+.ws-preview > .ws-paper { overflow-x:auto; padding:12px 4px 24px; }
+.ws-empty { padding:80px 20px; text-align:center; border:1px dashed var(--line); border-radius:12px; color:var(--muted); }
+/* One typography/layout definition for preview, measurement and print portal. */
+.ws-paper, .app .ws-paper { color-scheme:only light; color:#171717; font-size:10pt; line-height:1.5; text-align:left; }
+.ws-paper *, .app .ws-paper * { box-sizing:border-box; font-family:'Segoe UI','Yu Gothic',Meiryo,Arial,sans-serif!important; color:#171717; letter-spacing:normal!important; }
+.ws-paper :is(p,h3) { margin:0; padding:0; }
+.ws-paper p { font-size:10pt; line-height:1.5; }
+.ws-paper small { font-size:9pt; }
+.ws-sheet { width:210mm; height:297mm; padding:12mm; display:grid; grid-template-rows:18mm 241mm 10mm; gap:2mm; background:#fff; margin:0 auto 20px; box-shadow:0 2px 12px #0002; overflow:hidden; }
+.ws-sheet-head { display:flex; justify-content:space-between; gap:6mm; border-bottom:0.3mm solid #333; }
+.ws-sheet-head > div { flex:1; min-width:0; }
+.ws-sheet-head p { font-size:9pt; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ws-sheet-head > small { flex-shrink:0; }
+.ws-sheet-body { display:flex; flex-direction:column; gap:4mm; }
+.ws-sheet-foot { border-top:0.2mm solid #aaa; display:flex; justify-content:space-between; align-items:center; gap:3mm; font-size:7pt; }
+.ws-block { border:0.2mm solid #aaa; border-radius:2mm; padding:3mm; background:#fff; overflow-wrap:anywhere; break-inside:avoid; }
+.ws-kanji-heading { display:flex; gap:4mm; align-items:center; }
+.ws-model { width:22mm; height:22mm; flex-shrink:0; display:grid; place-items:center; font-size:42pt; }
+.ws-model svg { width:100%; height:100%; }
+.ws-steps { display:flex; flex-wrap:wrap; gap:1mm; margin:2mm 0; }
+.ws-steps > div { width:12mm; text-align:center; }
+.ws-steps svg { width:12mm; height:12mm; display:block; border:0.2mm solid #ccc; }
+.ws-steps small { font-size:7pt; }
+.ws-practice { display:flex; flex-wrap:wrap; gap:2mm; margin-top:3mm; }
+.ws-word-cells { display:flex; flex-wrap:wrap; max-width:100%; }
+.ws-cell { width:var(--cell); height:var(--cell); border:0.2mm solid #aaa; position:relative; display:grid; place-items:center; font-size:calc(var(--cell) * .72); line-height:1; }
+.ws-cell::before { content:''; position:absolute; left:50%; top:0; height:100%; border-left:0.2mm dashed #ddd; }
+.ws-cell::after { content:''; position:absolute; top:50%; left:0; width:100%; border-top:0.2mm dashed #ddd; }
+.ws-cell > * { position:relative; z-index:1; }
+.ws-cell svg { width:90%; height:90%; }
+.ws-trace .ws-cell > * { opacity:.28; }
+.ws-self-check { font-size:9pt; margin-top:2mm; }
+.ws-word-heading { display:flex; flex-wrap:wrap; align-items:baseline; gap:2mm 4mm; }
+.ws-word-heading b { font-size:14pt; }
+.ws-example { margin-top:2mm; }
+.ws-paper .ws-sentence { margin-top:4mm; }
+.ws-question p { display:flex; align-items:baseline; gap:2mm; margin:4mm 0; }
+.ws-answer-line { flex:1; border-bottom:0.2mm dotted #777; }
+.ws-key h3 { font-size:12pt; margin-bottom:3mm; }
+.ws-key p { margin:2mm 0; }
+.ws-measure { position:fixed; left:-10000px; top:0; width:186mm; visibility:hidden; pointer-events:none; }
+.ws-capacity { height:241mm; }
+#worksheet-print-root { display:none; }
+@media(max-width:1000px) { .ws-workspace { grid-template-columns:1fr; } .worksheet-page { padding:20px 12px; } }
+@media print {
+  @page { size:A4 portrait; margin:0; }
+  html:has(#worksheet-print-root),body:has(#worksheet-print-root) { margin:0!important; padding:0!important; background:#fff!important; min-width:0!important; }
+  body:has(#worksheet-print-root) { overflow:visible!important; }
+  .ws-dialog, .ws-dialog::backdrop { display:none!important; }
+  body:has(#worksheet-print-root) > *:not(#worksheet-print-root) { display:none!important; }
+  #worksheet-print-root { display:block!important; }
+  .ws-sheet { margin:0; box-shadow:none; break-after:page; page-break-after:always; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  .ws-sheet:last-child { break-after:auto; page-break-after:auto; }
+}

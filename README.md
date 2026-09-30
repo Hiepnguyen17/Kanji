@@ -47,6 +47,16 @@ npm run dev
 
 Mở [http://localhost:5173](http://localhost:5173). Biến `VITE_API_BASE_URL` trong `.env.local` cho phép đổi URL API; mặc định là `http://localhost:8010`.
 
+## Kiểm thử
+
+```powershell
+\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
+npm run test
+```
+
+Lệnh này kiểm tra API công khai và khóa admin, migration SQLite từ schema cũ,
+dữ liệu ngữ pháp N5–N1, và quy tắc render chip công thức ngữ pháp.
+
 ## Cấu hình API
 
 Frontend chỉ dùng `VITE_API_BASE_URL`; không ghi cứng địa chỉ API trong từng màn hình. Backend chỉ cho các origin trong `KANJIAI_CORS_ORIGINS` gọi API.
@@ -100,9 +110,65 @@ Chạy lệnh sau trên VPS để tạo snapshot nhất quán khi API đang ho�
 sh deploy/backup-sqlite.sh
 ```
 
-File backup được tạo trong `backups/` và bị Git bỏ qua. Nên chạy lệnh này bằng
-cron mỗi ngày và sao chép backup sang nơi lưu trữ khác. Không sao chép thư mục
+File backup được tạo trong `backups/` và bị Git bỏ qua. Script kiểm tra SQLite
+sau khi sao lưu rồi giữ **14 bản gần nhất** (đổi bằng `KANJIAI_BACKUP_KEEP`).
+Backup trên cùng VPS **không đủ** để khôi phục nếu mất máy chủ; cần sao chép một
+bản ra máy riêng. Không sao chép thư mục
 `backend/data/local/` hay `deploy/.env.production` lên GitHub.
+
+Trước khi đưa domain vào sử dụng, kiểm tra biến production mà không làm lộ
+secret:
+
+```bash
+sh deploy/verify-production.sh
+```
+
+Sau khi kiểm tra đạt, cài cron backup mỗi ngày lúc **03:15 theo giờ VPS**:
+
+```bash
+sh deploy/install-backup-cron.sh
+crontab -l
+```
+
+Sau lần chạy cron đầu tiên, **xác nhận bằng file thực và log**:
+
+```bash
+crontab -l | grep 'KanjiAI SQLite backup'
+ls -lt backups/kanjiai-*.db | head
+tail -n 30 backups/backup-cron.log
+```
+
+Kiểm tra và phục hồi thử **vào một file khác**, tuyệt đối không ghi đè
+`/data/kanjiai.db` đang chạy:
+
+```bash
+python3 deploy/verify_backup.py --backup backups/kanjiai-YYYYMMDDTHHMMSSZ.db --restore-to /tmp/kanjiai-restore-test.db
+```
+
+Thay tên file bằng bản backup thực. Lệnh từ chối ghi đè nếu file đích đã có.
+Trên máy Windows có OpenSSH, lấy bản mới nhất ra thư mục **ngoài repository**
+(SSH/SCP sẽ hỏi mật khẩu nếu chưa cấu hình khóa):
+
+```powershell
+.\deploy\download-latest-backup.ps1 -DestinationDirectory D:\KanjiAI-backups
+```
+
+File tải về được kiểm tra `PRAGMA integrity_check` và các bảng thiết yếu.
+Không lưu backup chứa dữ liệu tài khoản lên GitHub hay kho công khai.
+
+Đổi giờ chạy khi cần (ví dụ 02:30) bằng:
+
+```bash
+KANJIAI_BACKUP_CRON='30 2 * * *' sh deploy/install-backup-cron.sh
+```
+
+Ví dụ chỉ giữ 7 bản trên VPS: `KANJIAI_BACKUP_KEEP=7 sh deploy/install-backup-cron.sh`.
+
+## Kiểm tra nội dung và trang giới thiệu
+
+- `/about` trình bày chức năng đã có, chức năng chưa làm, nguồn dữ liệu và dữ liệu tài khoản được lưu.
+- `python deploy/audit_content.py --db backend/kanjiai.db --svg-root public/kanjivg` rà các trường/ví dụ/SVG còn thiếu mà không đọc dữ liệu người học.
+- Xem kết quả rà local và giới hạn kiểm tra tại [CONTENT_AUDIT.md](CONTENT_AUDIT.md).
 ## Đăng nhập Google và tiến độ học
 
 Ứng dụng dùng Google OAuth theo luồng mở cửa sổ chọn tài khoản, giống màn hình Google trong ảnh tham khảo. Lần đầu đăng nhập sẽ tự tạo tài khoản; cookie phiên chỉ được lưu ở API, còn tiến độ Kanji/từ vựng/ngữ pháp nằm trong SQLite theo từng tài khoản.
@@ -114,6 +180,22 @@ cron mỗi ngày và sao chép backup sang nơi lưu trữ khác. Không sao ch�
 5. Khởi động lại backend và nhấn **Đăng nhập bằng Google** trong ứng dụng.
 
 Khi triển khai thật, thay `GOOGLE_REDIRECT_URI`, `KANJIAI_APP_URL`, `KANJIAI_CORS_ORIGINS` bằng các URL HTTPS thật và đăng ký đúng redirect URI đó trong Google Cloud Console.
+
+## Tạo phiếu học để in / lưu PDF
+
+Mở **Tạo phiếu học** trên thanh điều hướng (`/worksheets`), hoặc dùng nút ở
+ngày học Kanji, bài từ vựng và tab Kanji/Từ vựng trong danh sách ôn tập.
+Nguồn bài học dùng được khi chưa đăng nhập; nguồn ôn tập yêu cầu tài khoản.
+
+- Luyện viết Kanji: chữ mẫu có số nét, các bước nét từ SVG KanjiVG, ô tô mờ và ô tự viết.
+- Luyện viết từ vựng: từ, cách đọc, nghĩa, ví dụ nếu có và dòng tự đặt câu.
+- Tự kiểm tra từ vựng: điền cách đọc/nghĩa hoặc viết từ từ gợi ý; có thể đảo đề và thêm đáp án riêng ở cuối.
+
+Chọn tối đa 100 mục/lần, cỡ ô 10/12/15 mm, bật/tắt cách đọc và ví dụ.
+Trang A4 được phân theo chiều cao thực tế, mỗi khối từ/chữ giữ nguyên trên một trang.
+Chọn **In / Lưu PDF**, khổ A4, tỷ lệ 100%, tắt đầu/chân trang trình duyệt;
+chọn **Lưu dưới dạng PDF** nếu không in giấy. Không cần API AI hay dịch vụ tạo PDF.
+Tạo/in phiếu không ghi tiến độ học. SVG thiếu được thông báo và thay bằng chữ mẫu.
 
 ## Nhận diện viết tay
 
@@ -168,3 +250,4 @@ Invoke-RestMethod http://localhost:8010/admin/content-audit -Headers @{ 'X-Admin
 - SVG thứ tự nét: KanjiVG.
 - Nhận diện Nhật: DaKanji v2, Dariyooo / DaAppLab, MIT.
 - Dữ liệu huấn luyện Trung: CASIA-HWDB; chỉ model đã huấn luyện được dùng khi giấy phép dữ liệu không cho phân phối dataset.
+- Một phần danh sách/từ liên quan JLPT đã được tham khảo từ Kanjikana; xem [KANJI_SOURCES.md](KANJI_SOURCES.md) để biết phạm vi và phần quyền tái sử dụng còn cần xác minh trước khi tái phân phối dataset.

@@ -80,6 +80,9 @@ def initialize_database():
             content_type TEXT NOT NULL CHECK(content_type IN ('kanji','vocabulary','grammar')),
             content_id TEXT NOT NULL,
             created_at INTEGER NOT NULL,
+            last_result TEXT NOT NULL DEFAULT 'new' CHECK(last_result IN ('new','remembered','forgot')),
+            reviewed_at INTEGER,
+            review_count INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY(user_id, content_type, content_id)
         );
         CREATE TABLE IF NOT EXISTS user_settings (
@@ -117,6 +120,13 @@ def initialize_database():
         progress_columns = {column["name"] for column in db.execute("PRAGMA table_info(user_progress)")}
         if "resume_position" not in progress_columns:
             db.execute("ALTER TABLE user_progress ADD COLUMN resume_position INTEGER NOT NULL DEFAULT 0")
+        review_columns = {column["name"] for column in db.execute("PRAGMA table_info(user_review_items)")}
+        if "last_result" not in review_columns:
+            db.execute("ALTER TABLE user_review_items ADD COLUMN last_result TEXT NOT NULL DEFAULT 'new'")
+        if "reviewed_at" not in review_columns:
+            db.execute("ALTER TABLE user_review_items ADD COLUMN reviewed_at INTEGER")
+        if "review_count" not in review_columns:
+            db.execute("ALTER TABLE user_review_items ADD COLUMN review_count INTEGER NOT NULL DEFAULT 0")
         for kanji in SEED_KANJI:
             db.execute("""INSERT OR IGNORE INTO kanji(char,meaning,on_reading,kun_reading,strokes,level,radical,han_viet)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", kanji)
