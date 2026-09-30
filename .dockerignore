@@ -9,6 +9,7 @@ __pycache__/
 dist
 backups/
 backend/.env
+deploy/.env*
 backend/data/
 backend/backups/
 backend/.cache/
