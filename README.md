@@ -175,6 +175,10 @@ Ví dụ chỉ giữ 7 bản trên VPS: `KANJIAI_BACKUP_KEEP=7 sh deploy/install
 
 Khi triển khai thật, thay `GOOGLE_REDIRECT_URI`, `KANJIAI_APP_URL`, `KANJIAI_CORS_ORIGINS` bằng các URL HTTPS thật và đăng ký đúng redirect URI đó trong Google Cloud Console.
 
+## AI đánh giá bài tập ngữ pháp (Gemini)
+
+Nút **AI đánh giá** dùng Gemini API qua backend; **Kiểm tra** và **Xem đáp án** không cần API key. Tạo key trong [Google AI Studio](https://aistudio.google.com/app/apikey) và chọn project Free Tier nếu khả dụng. Thêm `GEMINI_API_KEY=...` vào `backend/.env` khi chạy local, hoặc `deploy/.env.production` trên VPS. Model mặc định là `gemini-3.5-flash-lite`; có thể đổi qua `GEMINI_GRAMMAR_MODEL`. Khởi động lại backend/container API sau khi sửa môi trường. Không đặt key trong biến `VITE_`, frontend hay Git. Giới hạn tại ứng dụng hiện là 20 lượt/người/ngày và 200 lượt/toàn máy chủ/ngày; hạn mức Free Tier của Google có thể thấp hơn. Nếu còn `OPENAI_API_KEY` cũ trong file môi trường, bạn có thể xóa thủ công; ứng dụng không dùng biến đó nữa.
+
 ## Tạo phiếu học để in / lưu PDF
 
 Mở **Tạo phiếu học** trên thanh điều hướng (`/worksheets`), hoặc dùng nút ở
