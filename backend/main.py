@@ -39,6 +39,7 @@ load_local_environment()
 # Import after the local environment has been read so KANJIAI_DB_PATH can
 # select an ignored local test database before database.py resolves DB_PATH.
 from database import connect, initialize_database
+from grammar_ai import GrammarAIError, evaluate_grammar
 
 try:
     from recognizer import hanzi_model_status, model_status, recognize, recognize_hanzi_rasterized_png, recognize_rasterized_png, recognize_rasterized_strokes
@@ -113,6 +114,11 @@ class ProgressUpdate(BaseModel):
 
 class ReviewResultUpdate(BaseModel):
     remembered: bool
+
+class GrammarEvaluationRequest(BaseModel):
+    meaning: str = Field(min_length=1, max_length=400)
+    reference: str = Field(min_length=1, max_length=400)
+    answer: str = Field(min_length=1, max_length=400)
 
 class UserSettingsUpdate(BaseModel):
     dark_mode: bool | None = None
@@ -668,6 +674,21 @@ def grammar_lesson_detail(lesson_id: int):
             ).fetchall()
             detail.append({**row(pattern), "examples": [row(example) for example in examples]})
     return {**row(lesson), "patterns": detail}
+
+
+@app.post("/grammar/patterns/{pattern_id}/evaluate")
+def evaluate_grammar_answer(pattern_id: int, item: GrammarEvaluationRequest,
+                            token: str | None = Cookie(default=None, alias=SESSION_COOKIE)):
+    user = require_user(token)
+    with connect() as db:
+        pattern = db.execute("SELECT formula FROM grammar_patterns WHERE id=?", (pattern_id,)).fetchone()
+    if not pattern:
+        raise HTTPException(404, "Không tìm thấy mẫu ngữ pháp")
+    try:
+        return evaluate_grammar(user["id"], formula=pattern["formula"],
+                                meaning=item.meaning, reference=item.reference, answer=item.answer)
+    except GrammarAIError as error:
+        raise HTTPException(error.status_code, str(error)) from error
 
 
 @app.get("/admin/content-audit")

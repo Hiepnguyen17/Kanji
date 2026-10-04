@@ -9,6 +9,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -72,6 +73,36 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(self.client.get("/api/kanji/龘").status_code, 404)
         self.assertEqual(self.client.get("/admin/content-audit").status_code, 503)
         self.assertEqual(self.client.post("/api/handwriting/samples", json={"image": "x", "expected_text": "日"}).status_code, 503)
+
+    def test_grammar_ai_requires_login_and_server_key(self):
+        with self.main.connect() as db:
+            pattern_id = db.execute("SELECT id FROM grammar_patterns LIMIT 1").fetchone()[0]
+        url = f"/grammar/patterns/{pattern_id}/evaluate"
+        body = {"meaning": "Tôi là học sinh.", "reference": "私は学生です。", "answer": "私は学生です。"}
+        self.assertEqual(self.client.post(url, json=body).status_code, 401)
+        now = int(time.time())
+        token = "grammar-ai-test-user"
+        with self.main.connect() as db:
+            user_id = db.execute("INSERT INTO users(google_sub,email,display_name,created_at,last_login_at) VALUES (?,?,?,?,?)",
+                                 ("grammar-ai-test", "grammar-ai@example.test", "Test", now, now)).lastrowid
+            db.execute("INSERT INTO user_sessions(token_hash,user_id,expires_at,created_at) VALUES (?,?,?,?)",
+                       (self.main.session_digest(token), user_id, now + 3600, now))
+        self.client.cookies.set("kanjiai_session", token)
+        try:
+            with patch.dict(os.environ, {"GEMINI_API_KEY": ""}):
+                self.assertEqual(self.client.post(url, json=body).status_code, 503)
+            with patch("main.evaluate_grammar", return_value={"verdict": "correct", "feedback": "Câu đúng."}) as grader:
+                self.assertEqual(self.client.post(url, json=body).json(), {"verdict": "correct", "feedback": "Câu đúng."})
+                with self.main.connect() as db:
+                    formula = db.execute("SELECT formula FROM grammar_patterns WHERE id=?", (pattern_id,)).fetchone()[0]
+                self.assertEqual(grader.call_args.kwargs["formula"], formula)
+            with patch("main.evaluate_grammar", side_effect=self.main.GrammarAIError("Gemini API đã đạt giới hạn sử dụng.", 429)):
+                shortage = self.client.post(url, json=body)
+                self.assertEqual(shortage.status_code, 429)
+                self.assertIn("giới hạn", shortage.json()["detail"])
+            self.assertEqual(self.client.post("/grammar/patterns/99999999/evaluate", json=body).status_code, 404)
+        finally:
+            self.client.cookies.clear()
 
     def test_review_results_are_persistent_prioritized_and_account_scoped(self):
         now = int(time.time())
